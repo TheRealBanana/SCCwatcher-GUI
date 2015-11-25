@@ -992,10 +992,36 @@ class guiActions(object):
         self.context.emailSubjectTextbox.setEnabled(state)
         self.context.emailMessageTextbox.setEnabled(state)
     
+    def isNewerVersion(self, latest):
+        #This function will return True if the supplied version is older or the same as the current version
+        mreg = re.compile(r"(?P<major>[0-9]\.[0-9]{1,2})(:?(?P<sep>(?:[ab]|rc))(?P<minor>[0-9]{1,2}))?")
+        
+        cregex = mreg.match(self.context.SettingsManager.CURRENT_GUI_VERSION)
+        rregex = mreg.match(latest)
+        #cmajor is current major
+        #lmajor is latest major
+        curver = [cregex.group("major"), cregex.group("sep"), cregex.group("minor")]
+        latestver = [rregex.group("major"), rregex.group("sep"), rregex.group("minor")]
+        
+        #Now test all parts at once
+        for cur, latest in zip(curver, latestver):
+            if cur == latest:
+                    continue
+            if cur is None:
+                    return False
+            if latest is None:
+                    return True
+            if cur > latest:
+                    return False
+            if cur < latest: 
+                    return True
+            
+        return False
+
     def checkForUpdates(self):
         text_color = "#ff0000"
         comment = "Error!"
-        c = urlopen(self.context.SettingsManager._GITHUB_VER_URL_)
+        c = urlopen(self.context.SettingsManager.GITHUB_VER_URL)
         version_txt = c.read()
         c.close()
         #Fix some minor stuffs
@@ -1008,9 +1034,8 @@ class guiActions(object):
             return
         latest_version = version_dict["tag_name"]
         
-        #This seemed like a good idea at the time, but now I dunno
-        #It seems to work most of the time, as long as I dont do anything crazy with the version string.
-        if self.context.SettingsManager._CURRENT_GUI_VERSION_ < latest_version:
+        if self.isNewerVersion(latest_version) is True:
+            #latest_version is newer than ours 
             text_color = "#ff0000"
             comment = "Old"
         else:
@@ -1019,7 +1044,7 @@ class guiActions(object):
         
         #Set the latest version number in the GUI
         self.context.ugServVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:#0055ff;\">%s</span></p></body></html>" % (latest_version), None))
-        self.context.ugCliVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:%s;\">%s (%s)</span></p></body></html>" % (text_color, self.context.SettingsManager._CURRENT_GUI_VERSION_, comment), None))
+        self.context.ugCliVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:%s;\">%s (%s)</span></p></body></html>" % (text_color, self.context.SettingsManager.CURRENT_GUI_VERSION, comment), None))
         
 
     def quitApp(self):

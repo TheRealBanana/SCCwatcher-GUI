@@ -3,7 +3,7 @@ from collections import OrderedDict as OD
 from copy import deepcopy as DC
 
 #Tracking the current version from here only, making the change here updates everything.
-_CURRENT_GUI_VERSION_ = "2.0b3"
+_CURRENT_GUI_VERSION_ = "2.0b4"
 #GitHub API url for version infos
 _GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/SCCwatcher-GUI/releases/latest"
 
@@ -152,8 +152,8 @@ class sccwSettingsManager:
         self.isLoaded = False
         self.currentFile = ""
         #Current version tracking
-        self._CURRENT_GUI_VERSION_ = _CURRENT_GUI_VERSION_
-        self._GITHUB_VER_URL_ = _GITHUB_VERSION_URL_
+        self.CURRENT_GUI_VERSION = _CURRENT_GUI_VERSION_
+        self.GITHUB_VER_URL = _GITHUB_VERSION_URL_
         
     def resetSettings(self):
         self.appSettings.clear()   

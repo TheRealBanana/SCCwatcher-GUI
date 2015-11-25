@@ -1203,11 +1203,11 @@ class Ui_sccw_SettingsUI(object):
 "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18pt; font-weight:600; color:#b037b0;\">SCCwatcher</span></p>\n"
 "<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#000000;\">version: %s</span></p>\n"
 "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; color:#000000;\">Main script written in Python using only standard libraries. This GUI was written in Python using the PyQt framework. This script was written by TRB for the fine people of SCC. If you encounter any bugs, have any issues getting things working, or have any ideas or feature requests please contact TRB on the forums or on IRC.</span></p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\"><br /></span></p></body></html>" % (self.SettingsManager._CURRENT_GUI_VERSION_), None))
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\"><br /></span></p></body></html>" % (self.SettingsManager.CURRENT_GUI_VERSION), None))
         self.aboutTabUpdateGroup.setTitle(_translate("sccw_SettingsUI", "Update", None))
         self.ugCliVerLabel.setText(_translate("sccw_SettingsUI", "Your Version: ", None))
         self.ugServVerLabel.setText(_translate("sccw_SettingsUI", "Latest Version: ", None))
-        self.ugCliVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:#0055ff;\">%s</span></p></body></html>" % (self.SettingsManager._CURRENT_GUI_VERSION_), None))
+        self.ugCliVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:#0055ff;\">%s</span></p></body></html>" % (self.SettingsManager.CURRENT_GUI_VERSION), None))
         self.ugServVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:#ff5500;\">???</span></p></body></html>", None))
         self.ugCheckUpdateButton.setText(_translate("sccw_SettingsUI", "Check for Updates", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.aboutTab), _translate("sccw_SettingsUI", "About", None))
