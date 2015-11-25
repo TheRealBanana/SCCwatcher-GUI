@@ -1001,6 +1001,7 @@ class guiActions(object):
         #Fix some minor stuffs
         version_txt = version_txt.replace("true", "True")
         version_txt = version_txt.replace("false", "False")
+        version_txt = version_txt.replace("null", "None")
         try:
             version_dict = safe_eval(version_txt) #might still be a bad idea
         except:
