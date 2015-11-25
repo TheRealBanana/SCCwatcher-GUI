@@ -3,9 +3,9 @@ from collections import OrderedDict as OD
 from copy import deepcopy as DC
 
 #Tracking the current version from here only, making the change here updates everything.
-_CURRENT_GUI_VERSION_ = "2.0b2"
+_CURRENT_GUI_VERSION_ = "2.0b3"
 #GitHub API url for version infos
-_GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/sccwatcher/releases/latest"
+_GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/SCCwatcher-GUI/releases/latest"
 
 #Get ready for tons of lame code
 #The use of OD(), OrderedDict, means that the dictionary we create will be in the exact order as its created.
