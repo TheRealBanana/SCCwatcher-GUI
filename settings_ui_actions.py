@@ -118,12 +118,12 @@ class guiActions(object):
         #If there were changes, check how the user wanted us to proceed
         if has_changed is True:
             if rtn == QtGui.QMessageBox.Save:
-                self.saveUiToFile() #Should we move this to checkUiStateChange too? We have to do this every time.
+                if self.saveUiToFile() is False:
+                    return False
             elif rtn == QtGui.QMessageBox.Discard:
                 pass
             elif rtn == QtGui.QMessageBox.Cancel:
                 return False
-        
         #Now we clear the UI
         self.clearUiData(self.context.SettingsManager.guiDefaults["allOtherDefaults"])
         self.clearUiData(self.context.SettingsManager.guiDefaults["watchlistDefaults"])
@@ -467,19 +467,24 @@ class guiActions(object):
         #We will go through data{} and use the access method detailed in the uiElements dictionary.
         #The two's structure are identical, making this task extremely simple.
         
-        #If we already have a file loaded, prompt the user if they want to save or not
-        #This code is going to be changed to detect changes from the last saved internal state.
-        if self.context.SettingsManager.isLoaded == True:
-            #Check if we need to ask the user to save changes
-            has_changed, rtn = self.checkUiStateChange()
-            #If there were changes, check how the user wanted us to proceed
-            if has_changed is True:
-                if rtn == QtGui.QMessageBox.Save:
-                    self.saveUiToFile() #Should we move this to checkUiStateChange too? We have to do this every time.
-                elif rtn == QtGui.QMessageBox.Discard:
-                    pass
-                elif rtn == QtGui.QMessageBox.Cancel:
-                    return
+        
+        #prompt the user if they want to save or not
+        
+        #Check if we need to ask the user to save changes
+        has_changed, rtn = self.checkUiStateChange()
+        #If there were changes, check how the user wanted us to proceed
+        r = {}
+        r[QtGui.QMessageBox.Save] = "Save"
+        r[QtGui.QMessageBox.Discard] = "Discard"
+        r[QtGui.QMessageBox.Cancel] = "Cancel"
+        if has_changed is True:
+            if rtn == QtGui.QMessageBox.Save:
+                if self.saveUiToFile() is False:
+                    return 
+            elif rtn == QtGui.QMessageBox.Discard:
+                pass
+            elif rtn == QtGui.QMessageBox.Cancel:
+                return
         
         #Now that we have either saved or discared any changes made, we prompt the user to open up a new file
         #Get the new file name and tell the SettingsManager to update its QSettings object to use the new file location
@@ -664,7 +669,7 @@ class guiActions(object):
         #If there isnt a file currently loaded to save to, we turn this into a save-as dialog
         if self.context.SettingsManager.isLoaded == False:
             if not self.saveAsDialog(recurse=True):
-                return
+                return False
         
         #Similar to updateUi(), we are going to loop through the uiElements dict and use its access methods to save the Ui state.
         #Now we loop through each element and eval it into life. Then we send each element through a type checking function that will access its data depending on its type.
@@ -1051,9 +1056,9 @@ class guiActions(object):
         #Basially the same as new, except we then quit after that
         if self.newSettingsFile():
             #User wants to quit
+            self.context.MainWindow._user_accept_close = True
             self.context.MainWindow.close()
-            
-
+    
     #Undo/Redo system.
     #Temporarily removed to restore my sanity
     
