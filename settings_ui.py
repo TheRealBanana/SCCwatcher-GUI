@@ -871,8 +871,6 @@ class Ui_sccw_SettingsUI(object):
         self.tabWidget.setCurrentIndex(0)
         
         ## Slot connectors ##
-        #Closing signal
-        QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("appClosing"), self.guiActions.quitApp)
         #Menu actions
         QtCore.QObject.connect(self.action_Quit, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.quitApp)
         QtCore.QObject.connect(self.actionOpen, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.loadUiState)

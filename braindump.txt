@@ -1,15 +1,10 @@
-Bugs/problems:
-None
+Todo until GUI is done:
+
+
 		
 ------------------------------------
 ------------------------------------
 ------------------------------------
-FIXED
-	forgot to hook the X-button closing mechanism. Users can lose all unsaved data by closing with the x-button in the corner of the application.
-	The app doesnt ask to save changes when a user tries to open a file after modifying a new setting file
-	The app doesn't care if the user clicks cancel in the save dialog after clicking save in the unsaved changes warning dialog.
-
-
 DONE! Set default file type for file dialog when saving and loading.
 	
 DONE! What is the cancel button even supposed to do? Changed to quit

@@ -7,28 +7,14 @@
 
 import sys
 from settings_ui import *
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
-#This is required to override the closeEvent
-class SCCMainWindow(QtGui.QMainWindow):
-    def __init__(self, parent=None):
-        super(SCCMainWindow, self).__init__(parent)
-        self._user_accept_close = False
-        
-    def allowClose(self):
-        self._user_accept_close = True
-        
-    def closeEvent(self, event):
-        #We first emit the closing signal, then we actually close
-        self.emit(QtCore.SIGNAL("appClosing"))
-        if self._user_accept_close is True:
-            super(SCCMainWindow, self).closeEvent(event)
-        else:
-            event.ignore()
+
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    Window = SCCMainWindow()
+    Window = QtGui.QMainWindow()
     ui = Ui_sccw_SettingsUI()
     ui.setupUi(Window)
     Window.show()
