@@ -33,7 +33,7 @@ elementsToOptions["globalDupecheckCheck"] = ["GlobalSettings", "dupecheck"]
 elementsToOptions["globalSSLDownloadCheck"] = ["GlobalSettings", "download_ssl"]
 elementsToOptions["ggSavepathTextbox"] = ["GlobalSettings", "savepath"]
 #These Size Limit UI elements need some special treatment. Both when loading and saving.
-#These hold an additional object name that will signal the function to operate on this third data item, the element name that holds the suffix data.
+#These hold another object name in index 3 that will signal the function to operate on the third data item, the element name that holds the suffix data.
 elementsToOptions["globalSizeLimitLowerTextbox"] = ["GlobalSettings", "sizelimit_lower", "globalSizeLimitLowerSuffixSelector"]
 elementsToOptions["globalSizeLimitUpperTextbox"] = ["GlobalSettings", "sizelimit_upper", "globalSizeLimitUpperSuffixSelector"]
 elementsToOptions["globalCFBypassUseragentTextbox"] = ["GlobalSettings", "cfbypass_useragent"]
