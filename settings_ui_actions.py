@@ -473,10 +473,6 @@ class guiActions(object):
         #Check if we need to ask the user to save changes
         has_changed, rtn = self.checkUiStateChange()
         #If there were changes, check how the user wanted us to proceed
-        r = {}
-        r[QtGui.QMessageBox.Save] = "Save"
-        r[QtGui.QMessageBox.Discard] = "Discard"
-        r[QtGui.QMessageBox.Cancel] = "Cancel"
         if has_changed is True:
             if rtn == QtGui.QMessageBox.Save:
                 if self.saveUiToFile() is False:
@@ -514,8 +510,9 @@ class guiActions(object):
         if loaded_data.has_key("GlobalSettings") is False:
             #The settings ini we are trying to load doesnt have our main settings section
             #We will assume this is not a correct file and give an error to the user
-            errorbox = QtGui.QMessageBox()
-            errorbox.setText("There was an error while trying to load the provided settings file. This file doesn't look like a valid SCCwatcher 2.0 settings file.")
+            text = "There was an error while trying to load the provided settings file. This file doesn't look like a valid SCCwatcher 2.0 settings file."
+            errorbox = QtGui.QMessageBox(QtGui.QMessageBox.Critical, "SCCwatcher", text, QtGui.QMessageBox.Ok)
+            errorbox.setWindowIcon(self.context.icon)
             errorbox.exec_()
             self.context.SettingsManager.closeSettingsFile()
             #Set the title because by now we've already closed the old file so we are effectively at a New File state.
@@ -633,6 +630,7 @@ class guiActions(object):
         
     def removeMinusSignPrefix(self, text):
         #Silly to have this as its own function but recursing has its benefits
+        #wouldnt string.replace() work without needing recursion or looping?
         if text[0] == "-":
             text = text[1:]
             text = self.removeMinusSignPrefix(text)
@@ -794,6 +792,7 @@ class guiActions(object):
         return fixed_loaded_data
     
     def convertIndex(self, index):
+        #Changing these types() to isinstance(), comparing to their base classes, would be safer/more reliable.
         if type(index) == str:
             if index == "": suffix = 0
             if index == "KB": suffix = 1
@@ -807,7 +806,7 @@ class guiActions(object):
         return suffix
         
     def typeMatcher(self, access_object, operation, alt_obj = None, sc = False):
-        #This function will match the type of the access_object provided to a dictionary and return the data requested in operation.
+        #This function will match the type of the access_object provided to an entry in a dictionary and return the data requested in operation.
         #operation can be READ, WRITE or a special case called SLC_READ.
         if operation == "SLC_READ":
             #SLC_READ is used when we need both the size and suffix of our sizelimit entries in one piece of data.
@@ -972,6 +971,7 @@ class guiActions(object):
             
         self.context.utwuiStateLabel.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:%s;\">%s</span></p></body></html>" % (color, text), None))
         
+        #I wonder if setEnabled can take a simple 0/1 int so we don't have to do this compare
         if state > 0: state = True
         else: state = False
         self.context.utwuiHostnameTextbox.setEnabled(state)
@@ -997,8 +997,11 @@ class guiActions(object):
         self.context.emailSubjectTextbox.setEnabled(state)
         self.context.emailMessageTextbox.setEnabled(state)
     
+    #Ok we only use this function once, by the checkForUpdates() function.
+    #I feel like these should both be merged. There is little point besides clean code to separating them.
     def isNewerVersion(self, latest):
         #This function will return True if the supplied version is older or the same as the current version
+        #long expression to match something like this: 2.0b1
         mreg = re.compile(r"(?P<major>[0-9]\.[0-9]{1,2})(:?(?P<sep>(?:[ab]|rc))(?P<minor>[0-9]{1,2}))?")
         
         cregex = mreg.match(self.context.SettingsManager.CURRENT_GUI_VERSION)
@@ -1058,6 +1061,16 @@ class guiActions(object):
             #User wants to quit
             self.context.MainWindow._user_accept_close = True
             self.context.MainWindow.close()
+    
+    def getScriptStatus(self):
+        #This function connects to scc.py using a simple FIFO
+        #This side only needs to be a client so not too bad.
+        pass
+        
+        
+    
+    
+    
     
     #Undo/Redo system.
     #Temporarily removed to restore my sanity

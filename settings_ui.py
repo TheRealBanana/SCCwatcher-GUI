@@ -423,9 +423,9 @@ class Ui_sccw_SettingsUI(object):
         self.WLGaddEntryButton.setFont(font)
         self.WLGaddEntryButton.setMouseTracking(False)
         self.WLGaddEntryButton.setText(_fromUtf8(""))
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/plus-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.WLGaddEntryButton.setIcon(icon1)
+        green_plus_icon = QtGui.QIcon()
+        green_plus_icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/plus-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.WLGaddEntryButton.setIcon(green_plus_icon)
         self.WLGaddEntryButton.setObjectName(_fromUtf8("WLGaddEntryButton"))
         self.WLGremoveEntryButton = QtGui.QPushButton(self.watchlistGroup)
         self.WLGremoveEntryButton.setGeometry(QtCore.QRect(36, 414, 20, 20))
@@ -435,9 +435,9 @@ class Ui_sccw_SettingsUI(object):
         font.setWeight(75)
         self.WLGremoveEntryButton.setFont(font)
         self.WLGremoveEntryButton.setText(_fromUtf8(""))
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/delete-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.WLGremoveEntryButton.setIcon(icon2)
+        red_x_icon = QtGui.QIcon()
+        red_x_icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/delete-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.WLGremoveEntryButton.setIcon(red_x_icon)
         self.WLGremoveEntryButton.setObjectName(_fromUtf8("WLGremoveEntryButton"))
         self.WLGwatchlistItemsList = QtGui.QListWidget(self.watchlistGroup)
         self.WLGwatchlistItemsList.setGeometry(QtCore.QRect(10, 20, 281, 391))
@@ -557,8 +557,6 @@ class Ui_sccw_SettingsUI(object):
         self.tabWidget.addTab(self.watchlistTab, _fromUtf8(""))
         
         
-        
-        
         ## Avoidlist Tab ##
         self.globalAvoidlistTab = QtGui.QWidget()
         self.globalAvoidlistTab.setObjectName(_fromUtf8("globalAvoidlistTab"))
@@ -584,7 +582,7 @@ class Ui_sccw_SettingsUI(object):
         self.addAvoidEntryButton.setFont(font)
         self.addAvoidEntryButton.setMouseTracking(False)
         self.addAvoidEntryButton.setText(_fromUtf8(""))
-        self.addAvoidEntryButton.setIcon(icon1)
+        self.addAvoidEntryButton.setIcon(green_plus_icon)
         self.addAvoidEntryButton.setObjectName(_fromUtf8("addAvoidEntryButton"))
         self.removeAvoidEntryButton = QtGui.QPushButton(self.avoidlistGroup)
         self.removeAvoidEntryButton.setGeometry(QtCore.QRect(36, 414, 20, 20))
@@ -594,7 +592,7 @@ class Ui_sccw_SettingsUI(object):
         font.setWeight(75)
         self.removeAvoidEntryButton.setFont(font)
         self.removeAvoidEntryButton.setText(_fromUtf8(""))
-        self.removeAvoidEntryButton.setIcon(icon2)
+        self.removeAvoidEntryButton.setIcon(red_x_icon)
         self.removeAvoidEntryButton.setObjectName(_fromUtf8("removeAvoidEntryButton"))
         self.avoidlistItemsList = QtGui.QListWidget(self.avoidlistGroup)
         self.avoidlistItemsList.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
@@ -631,8 +629,6 @@ class Ui_sccw_SettingsUI(object):
         self.avoidFilterRegexCheck.setObjectName(_fromUtf8("avoidFilterRegexCheck"))
         self.horizontalLayout_2.addWidget(self.avoidlistSettingsGroup)
         self.tabWidget.addTab(self.globalAvoidlistTab, _fromUtf8(""))
-        
-        
         
         
         ## Email settings tab ##
@@ -719,7 +715,6 @@ class Ui_sccw_SettingsUI(object):
         self.tabWidget.addTab(self.emailSettingsTab, _fromUtf8(""))
         
         
-        
         ## About Tab ##
         self.aboutTab = QtGui.QWidget()
         self.aboutTab.setObjectName(_fromUtf8("aboutTab"))
@@ -775,48 +770,36 @@ class Ui_sccw_SettingsUI(object):
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
         sccw_SettingsUI.setMenuBar(self.menubar)
+        menu_font = QtGui.QFont()
+        menu_font.setFamily(_fromUtf8("Arial"))
+        menu_font.setPointSize(8)
         self.action_New = QtGui.QAction(sccw_SettingsUI)
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/Document-new-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.action_New.setIcon(icon3)
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Arial"))
-        font.setPointSize(8)
-        self.action_New.setFont(font)
+        new_doc_icon = QtGui.QIcon()
+        new_doc_icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/Document-new-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.action_New.setIcon(new_doc_icon)
+        self.action_New.setFont(menu_font)
         self.action_New.setObjectName(_fromUtf8("action_New"))
         self.actionOpen = QtGui.QAction(sccw_SettingsUI)
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/open-file-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionOpen.setIcon(icon4)
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Arial"))
-        font.setPointSize(8)
-        self.actionOpen.setFont(font)
+        open_file_icon = QtGui.QIcon()
+        open_file_icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/open-file-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionOpen.setIcon(open_file_icon)
+        self.actionOpen.setFont(menu_font)
         self.actionOpen.setObjectName(_fromUtf8("actionOpen"))
         self.actionSave = QtGui.QAction(sccw_SettingsUI)
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/Actions-document-save-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionSave.setIcon(icon5)
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Arial"))
-        font.setPointSize(8)
-        self.actionSave.setFont(font)
+        save_document_icon = QtGui.QIcon()
+        save_document_icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/Actions-document-save-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionSave.setIcon(save_document_icon)
+        self.actionSave.setFont(menu_font)
         self.actionSave.setObjectName(_fromUtf8("actionSave"))
         self.actionSave_As = QtGui.QAction(sccw_SettingsUI)
-        icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/Actions-document-save-all-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionSave_As.setIcon(icon6)
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Arial"))
-        font.setPointSize(8)
-        self.actionSave_As.setFont(font)
+        save_all_icon = QtGui.QIcon()
+        save_all_icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/Actions-document-save-all-icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionSave_As.setIcon(save_all_icon)
+        self.actionSave_As.setFont(menu_font)
         self.actionSave_As.setObjectName(_fromUtf8("actionSave_As"))
         self.action_Quit = QtGui.QAction(sccw_SettingsUI)
-        self.action_Quit.setIcon(icon2)
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Arial"))
-        font.setPointSize(8)
-        self.action_Quit.setFont(font)
+        self.action_Quit.setIcon(red_x_icon)
+        self.action_Quit.setFont(menu_font)
         self.action_Quit.setObjectName(_fromUtf8("action_Quit"))
         self.menuFile.addAction(self.action_New)
         self.menuFile.addAction(self.actionOpen)
@@ -872,6 +855,7 @@ class Ui_sccw_SettingsUI(object):
         
         ## Slot connectors ##
         #Closing signal
+        #So apparently we can use the signal QApplication::aboutToQuit(void)
         QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("appClosing"), self.guiActions.quitApp)
         #Menu actions
         QtCore.QObject.connect(self.action_Quit, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.quitApp)
@@ -1054,6 +1038,9 @@ class Ui_sccw_SettingsUI(object):
     
     def retranslateUi(self, sccw_SettingsUI):
         sccw_SettingsUI.setWindowTitle(_translate("sccw_SettingsUI", "SCCwatcher - New Settings File", None))
+        
+         #General tab
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.mainTab), _translate("sccw_SettingsUI", "General", None))
         self.generalGroup.setTitle(_translate("sccw_SettingsUI", "General Settings", None))
         self.ggMasterAutodlCheck.setText(_translate("sccw_SettingsUI", "Enable Autodl at Startup", None))
         self.ggNetworkDelaySpinbox.setSuffix(_translate("sccw_SettingsUI", " s", None))
@@ -1092,7 +1079,9 @@ class Ui_sccw_SettingsUI(object):
         self.ssVerboseState.setText(_translate("sccw_SettingsUI", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600; color:#ff0000;\">_ONOFF_</span></p></body></html>", None))
         self.ssVerboseLabel.setText(_translate("sccw_SettingsUI", "Verbose Output:", None))
         self.wipLabel.setText(_translate("sccw_SettingsUI", "Reserved for future awesomeness", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.mainTab), _translate("sccw_SettingsUI", "General", None))
+        
+        #Download/Upload Settings Tab
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.downloadUploadTab), _translate("sccw_SettingsUI", "Download/Upload Settings", None))
         self.generalDownloadSettingsGroup.setTitle(_translate("sccw_SettingsUI", "Global Download Settings", None))
         self.globalSSLDownloadCheck.setText(_translate("sccw_SettingsUI", "SSL Downloading", None))
         self.globalDupecheckCheck.setText(_translate("sccw_SettingsUI", "Dupechecking", None))
@@ -1131,7 +1120,9 @@ class Ui_sccw_SettingsUI(object):
         self.extCmdMasterEnableCheck.setText(_translate("sccw_SettingsUI", "Enable External Command", None))
         self.extCmdSelectProgramLabel.setText(_translate("sccw_SettingsUI", "Select Program:", None))
         self.extCmdArguemtsLabel.setText(_translate("sccw_SettingsUI", "Arguments:", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.downloadUploadTab), _translate("sccw_SettingsUI", "Download/Upload Settings", None))
+
+        #Watch List Tab
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.watchlistTab), _translate("sccw_SettingsUI", "Watch List", None))
         self.watchlistGroup.setTitle(_translate("sccw_SettingsUI", "Watchlist Items:", None))
         self.watchlistSettingsGroup.setTitle(_translate("sccw_SettingsUI", "Watch Settings:", None))
         self.WLSGwatchNameLabel.setText(_translate("sccw_SettingsUI", "Watch Name: ", None))
@@ -1160,13 +1151,18 @@ class Ui_sccw_SettingsUI(object):
         self.WLSGenableExternalCmdCheckbox.setText(_translate("sccw_SettingsUI", "Enable External Command", None))
         self.WLSGemailCheckbox.setText(_translate("sccw_SettingsUI", "Email on download", None))
         self.WLSGdupecheckingCheckbox.setText(_translate("sccw_SettingsUI", "Dupechecking", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.watchlistTab), _translate("sccw_SettingsUI", "Watch List", None))
+        
+        #Avoid List Tab
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.globalAvoidlistTab), _translate("sccw_SettingsUI", "Global Avoid List", None))
         self.avoidlistGroup.setTitle(_translate("sccw_SettingsUI", "Avoidlist Items:", None))
         self.avoidlistSettingsGroup.setTitle(_translate("sccw_SettingsUI", "Avoid Settings:", None))
         self.avoidNameLabel.setText(_translate("sccw_SettingsUI", "Avoid Name: ", None))
         self.avoidFilterLabel.setText(_translate("sccw_SettingsUI", "Avoid Filter:", None))
         self.avoidFilterRegexCheck.setText(_translate("sccw_SettingsUI", "Regex", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.globalAvoidlistTab), _translate("sccw_SettingsUI", "Global Avoid List", None))
+        
+        
+        #General Emailer Settings Tab
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.emailSettingsTab), _translate("sccw_SettingsUI", "Emailer Settings", None))
         self.generalEmailSettings.setTitle(_translate("sccw_SettingsUI", "General Emailer Settings", None))
         self.hostnameIPLabel.setText(_translate("sccw_SettingsUI", "Hostname/IP:", None))
         self.emailMasterEnableCheck.setText(_translate("sccw_SettingsUI", "Enable Emailer", None))
@@ -1196,7 +1192,10 @@ class Ui_sccw_SettingsUI(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%sccgrptree%</span><span style=\" font-size:8pt;\"> - mimics the functionality of SCCGRPTREE</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%sccgrp%</span><span style=\" font-size:8pt;\"> - mimics the functionality of SCCGRP</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%sccdate%</span><span style=\" font-size:8pt;\"> - This will output a date in the form MMDD, just like SCCDATE does when making new watch dirs.</span></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.emailSettingsTab), _translate("sccw_SettingsUI", "Emailer Settings", None))
+        
+        
+        #About tab
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.aboutTab), _translate("sccw_SettingsUI", "About", None))
         self.aboutGroup.setTitle(_translate("sccw_SettingsUI", "About", None))
         self.agAboutTextbox.setHtml(_translate("sccw_SettingsUI", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
@@ -1212,7 +1211,8 @@ class Ui_sccw_SettingsUI(object):
         self.ugCliVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:#0055ff;\">%s</span></p></body></html>" % (self.SettingsManager.CURRENT_GUI_VERSION), None))
         self.ugServVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:#ff5500;\">???</span></p></body></html>", None))
         self.ugCheckUpdateButton.setText(_translate("sccw_SettingsUI", "Check for Updates", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.aboutTab), _translate("sccw_SettingsUI", "About", None))
+        
+        #Menu Bar
         self.menuFile.setTitle(_translate("sccw_SettingsUI", "&File", None))
         self.action_New.setText(_translate("sccw_SettingsUI", "&New", None))
         self.action_New.setShortcut(QtCore.Qt.Key_N | QtCore.Qt.CTRL)
