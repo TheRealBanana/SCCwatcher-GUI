@@ -34,8 +34,8 @@ elementsToOptions["globalSSLDownloadCheck"] = ["GlobalSettings", "download_ssl"]
 elementsToOptions["ggSavepathTextbox"] = ["GlobalSettings", "savepath"]
 #These Size Limit UI elements need some special treatment. Both when loading and saving.
 #These hold an additional object name that will signal the function to operate on this third data item, the element name that holds the suffix data.
-elementsToOptions["globalSizeLimitLowerTextbox"] = ["GlobalSettings", "sizelimit_lower", "globalSizeLimitLowerSuffixSelector"]
-elementsToOptions["globalSizeLimitUpperTextbox"] = ["GlobalSettings", "sizelimit_upper", "globalSizeLimitUpperSuffixSelector"]
+elementsToOptions["globalSizeLimitLowerTextbox"] = ["GlobalSettings", "lower_sizelimit", "globalSizeLimitLowerSuffixSelector"]
+elementsToOptions["globalSizeLimitUpperTextbox"] = ["GlobalSettings", "upper_sizelimit", "globalSizeLimitUpperSuffixSelector"]
 elementsToOptions["globalCFBypassUseragentTextbox"] = ["GlobalSettings", "cfbypass_useragent"]
 elementsToOptions["globalCFBypassCookiefilePathTextbox"] = ["GlobalSettings", "cfbypass_cookiefile"]
 #ftp settings
@@ -99,7 +99,7 @@ avoidListElements = OD()
 #A_TITLE functions identically to W_TITLE, except the avoid name is prefixed by a minus sign, to mark it as an avoid.
 avoidListElements["avoidNameTextbox"] = ["ASPECIAL", "A_TITLE"]
 avoidListElements["avoidFilterTextbox"] = ["ASPECIAL", "avoid_filter"]
-avoidListElements["avoidFilterRegexCheck"] = ["ASPECIAL", "use_regex"]
+avoidListElements["avoidFilterRegexCheck"] = ["ASPECIAL", "avoid_regex"]
 
 
 #This small dict keeps track of the read and write methods of different Qt types as well as the argument's expected data type

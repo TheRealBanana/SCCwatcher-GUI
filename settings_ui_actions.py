@@ -10,11 +10,6 @@ from copy import deepcopy as DC
 from ntpath import basename as ntpath_basename
 from urllib import urlopen
 from ast import literal_eval as safe_eval
-from multiprocessing.connection import Client
-from uuid import getnode
-from time import sleep
-import threading
-import thread
 import re
 
 try:
@@ -35,110 +30,9 @@ def regexValidator(expr):
     except:
         return False
 
-
-#This class manages most of the multithreaded crap.
-#I was going to go QThreads but there were like 3 different articles saying the previous one was wrong so I dunno anymore.
-class conMan(object):
-    def __init__(self, secret=getnode()):
-        self.connected = False
-        self.connection = None
-        self.secret = str(secret)
-        self.data = None #Not sure how well this is going to work out
-        self.thread_manager = {} #Holds pointers to the different threads so we can join() them when necessary
-        self.thread_manager["recv_worker"] = None
-        self.thread_manager["con_worker"] = None
-    #I'm torn on whether worker functions should be separate functions or class methods of an already-instantiated object.
-    #I was hoping the separate thread could update the internal state of the objects self.connected and self.data
-    
-    def got_data(self, data):
-        print "GOT DATA!"
-        print "LEN:", len(data)
-        print "TYP:", type(data)
-        print "DTA:", str(data)
-        print "SME:", data == self.data
-        print "------------------------------"
-    
-    def con_callback(self, connection):
-        #Make sure we don't have any old recv threads up, if we do they probably have the wrong connection var anyway.
-        if self.thread_manager["recv_worker"] is not None:
-            self.thread_manager["recv_worker"].join()
-            self.thread_manager["recv_worker"] = None
-        print "Still here heh"
-        recv_thread = threading.Thread(target=self.recv_worker, args=(connection,))
-        self.thread_manager["recv_worker"] = recv_thread
-        #And start the recv worker
-        recv_thread.start()
-        #And finally we send our standard request for data on script status
-        connection.send("rqstatus")
-        self.connection = connection
-    
-    
-    def recv_worker(self, connection):
-        while True:
-            if self.connected is True:
-                try:
-                    data = connection.recv()
-                    self.data = data
-                    self.got_data(data)
-                    #And on and on forever...
-                except Exception as e:
-                    #Probably a connection error. Reset
-                    print "recv_worker error:"
-                    print e
-                    print "========================"
-                    self.connected = False
-                    self.connection = None
-                    return "Blah"
-            else:
-                self.startProcClient()
-            sleep(5)
-    
-    def con_worker(self, address, secret):
-        while True:
-            if self.connected is False:
-                try:
-                    conn = Client(address, authkey=str(secret))
-                    self.connected = True
-                    self.con_callback(conn)
-                except Exception as e:
-                    self.connected = False
-                    self.connection = None
-                    print "BLEW UP!"
-                    print str(e)
-                    print "--------------------------------------------"
-            #Don't want to go crazy always trying to connect, once every few seconds is fine
-            sleep(5)
-    
-    def startProcClient(self):
-        #Again the port is arbitrary, just a random port.
-        #Just make sure it matches the port in comServ() in scc.py
-        address = ('127.0.0.1', 36187)
-        #First make sure all threads have been join'ed if they exist
-        #if self.thread_manager["con_worker"] is not None:
-        #    self.thread_manager["con_worker"].join()
-        #    self.thread_manager["con_worker"] = None
-            
-        if self.thread_manager["recv_worker"] is not None:
-            self.thread_manager["recv_worker"].join()
-            self.thread_manager["recv_worker"] = None
-        #Spin off the connection getter into the background, waiting for it to connect
-        #con_thread = threading.Thread(target=self.con_worker, args=(address, self.secret))
-        #My drug addled brain had a hard time figuring out the exact architecture needed for proper threading.Thread use
-        #I had to join() from outside the thread's call stack and I'm just not up to that right now (new years fun heh)
-        #So this is easier and it works. And anyway this thread doesnt NEED any new info so it can just exist in the bg no prob
-        thread.start_new_thread(self.con_worker, (address, self.secret))
-        #Add the pointer to the thread so we can close it down later
-        #self.thread_manager["con_worker"] = con_thread
-        #And start the recv worker
-        #con_thread.start()
-        
-
 class guiActions(object):
     def __init__(self, context):
         self.context = context
-        #Start our process connector client.
-        self.cli = conMan()
-        self.cli.startProcClient()
         #this is different from self.context.SettingsManager.isLoaded.
         #This just flags during the load operation itself and gives no indication as to whether or not something is currently loaded.
         self.__is_loading = False
@@ -590,20 +484,15 @@ class guiActions(object):
         #Discontinue if the user canceled selection of a file
         if len(filename) < 1:
             return
-        else:
-            #close the old file first
-            self.context.SettingsManager.closeSettingsFile()
-            self.context.SettingsManager.openSettingsFile(filename)
         
+        
+        #close the old file first
+        self.context.SettingsManager.closeSettingsFile()
         #Clear UI state
-        self.clearUiData(self.context.SettingsManager.guiDefaults["allOtherDefaults"])
-        self.clearUiData(self.context.SettingsManager.guiDefaults["watchlistDefaults"])
-        self.clearUiData(self.context.SettingsManager.guiDefaults["avoidlistDefaults"])
-        #Remove any watches or avoids
-        self.clearList(self.context.WLGwatchlistItemsList)
-        self.clearList(self.context.avoidlistItemsList)
+        self.newSettingsFile()
         
         #Load up the data
+        self.context.SettingsManager.openSettingsFile(filename)
         loaded_data = self.context.SettingsManager.loadSettings()
         #We have to convert the ini option names back into the element object's name.
         converted_data = OD()
