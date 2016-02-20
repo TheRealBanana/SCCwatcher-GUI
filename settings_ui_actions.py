@@ -120,7 +120,14 @@ class guiActions(object):
                 pass
             elif rtn == QtGui.QMessageBox.Cancel:
                 return False
+        
         #Now we clear the UI
+        self.clearGUIState()
+        
+        #Just for some other logic stuffs
+        return True
+    
+    def clearGUIState(self):
         self.clearUiData(self.context.SettingsManager.guiDefaults["allOtherDefaults"])
         self.clearUiData(self.context.SettingsManager.guiDefaults["watchlistDefaults"])
         self.clearUiData(self.context.SettingsManager.guiDefaults["avoidlistDefaults"])
@@ -139,8 +146,8 @@ class guiActions(object):
         #and finally set the UI state to fresh
         self.updateUiStateInfo()
         
-        #Just for some other logic stuffs
-        return True
+    
+    
         
     def checkListChanges(self, list_object, check_dict):
         #This function will take a watchlist object as list_object and compare its items against the data stored in check_dict
@@ -283,7 +290,7 @@ class guiActions(object):
         #This function will add a new list item to the avoid list
         self.addNewListItem(self.context.avoidlistItemsList)
     
-    def addNewListItem(self, access_object, wl_defaults=None):
+    def addNewListItem(self, access_object, list_defaults=None):
         #Temporarily disable sorting
         __sortingEnabled = access_object.isSortingEnabled()
         access_object.setSortingEnabled(False)
@@ -294,8 +301,14 @@ class guiActions(object):
         #Set its text
         item.setText(_translate("sccw_SettingsUI", item_title, None))
         #Set the default data items if we are a new watchlist item:
-        if wl_defaults is not None:
-            item.setData(Qt.UserRole, wl_defaults)  
+        if list_defaults is not None:
+            #Set the title
+            list_defaults["WLSGwatchNameTextbox"] = item_title
+        else:
+            #Avoid, we just set the title, everythign else is default
+            list_defaults = {"avoidNameTextbox": item_title, "avoidFilterTextbox": "", "avoidFilterRegexCheck": 0}
+            
+        item.setData(Qt.UserRole, list_defaults)
         #And add the item to the list
         access_object.addItem(item)
         #Finally we reenable sorting, if it was enabled before
@@ -489,7 +502,7 @@ class guiActions(object):
         #close the old file first
         self.context.SettingsManager.closeSettingsFile()
         #Clear UI state
-        self.newSettingsFile()
+        self.clearGUIState()
         
         #Load up the data
         self.context.SettingsManager.openSettingsFile(filename)
@@ -512,9 +525,19 @@ class guiActions(object):
         
         #First we do the general options
         converted_data["GlobalSettings"] = OD()
+        keys_to_match = self.context.SettingsManager.REVelementsToOptions.keys()
         for key, value in loaded_data["GlobalSettings"].iteritems():
-            objectname = self.context.SettingsManager.REVelementsToOptions[key]
-            converted_data["GlobalSettings"][objectname] = value
+            #While the below seems odd and roundaboutish for simple retrieving of data, I needed to be able to match a dict key against a string that
+            #might not be the same case. If I just .lower'd() everything it would make the configs look ugly without caps differentiating the words.
+            #At some point, no matter the solution, the lowercase keys must somehow be matched against the cased keys. We then need to return the cased key.
+            for i in keys_to_match:
+                match_string = re.search("(" + str(key) + ")", i, re.I)
+                if match_string is not None:
+                    #Got our cased key
+                    cased_key = match_string.group(1)
+            
+            objectname = self.context.SettingsManager.REVelementsToOptions[cased_key]
+            converted_data["GlobalSettings"][str(objectname)] = value
         
         
         #Clean up loaded_data so we are left with just watches and avoids.
@@ -533,6 +556,10 @@ class guiActions(object):
         #First we do the GlobalSettings.
         #We look through our elementsToOptions dict and set each options as we come upon it.
         for element, einfos in self.context.SettingsManager.elementsToOptions.iteritems():
+            #If we come upon an option in our element list that doesn't exist in the ini file, we just skip it.
+            #The defaults in the GUI will take over from there.
+            if converted_data["GlobalSettings"].has_key(element) is False:
+                continue
             data = converted_data["GlobalSettings"][element]
             
             #Make a live access object from element and then use its type to get our access function
@@ -541,21 +568,40 @@ class guiActions(object):
             #we use typeMatcher() to return our write function
             access_function, datatype = self.typeMatcher(live_element_obj, "WRITE")
             
+            #Handle all checkboxes that aren't tristate. This just converts the 1's to 2's.
+            if "QCheckBox" in str(type(live_element_obj)):
+                if element != "utwuiMasterEnableTriCheck" and element != "WLSGutWebUiCheckox":
+                    if int(data) == 1:
+                        data = 2
+            
             #special case for size limit selector
             if len(einfos) > 2:
+                prefix = ""
+                suffix = ""
                 #Check if we have any data, if not we just move along
                 if len(data) < 1:
                     continue
                 #Split up the data into two part, prefix and suffix
-                prefix, suffix = re.match("([0-9]{1,9})([A-Za-z]{2})", data).groups()
-                suffix = self.convertIndex(suffix)
+                try:
+                    prefix, suffix = re.match("([0-9]{1,9})([A-Za-z]{0,2})", data).groups()
+                    if len(suffix) > 0:
+                        suffix = self.convertIndex(suffix)
+                    
+                except:
+                    #Probably set weird
+                    pass
                 #Get the live function for the suffix
                 suffix_access_string = "self.context." + str(einfos[2])
                 live_suffix_obj = eval(suffix_access_string)
                 suffix_access_function = self.typeMatcher(live_suffix_obj, "WRITE")[0]
                 #Now we set the data for the prefix
                 access_function(prefix)
-                suffix_access_function(suffix)
+                if type(suffix) is not int:
+                    try:
+                        suffix = int(suffix)
+                    except:
+                        suffix = 0
+                suffix_access_function(int(suffix))
                 
             else:
                 #Get and set the needed type for the data we plan to set
@@ -739,6 +785,12 @@ class guiActions(object):
     
     def fixElementsToOptionsSave(self, cur_L_data, listElements):
         fixed_L_data = OD()
+        cur_L_data_fixed = OD()
+        #First we have to loop through cur_L_data and convert all the keys to proper strings
+        for key, value in cur_L_data.iteritems():
+            cur_L_data_fixed[str(key)] = str(value)
+        
+        
         for element, data_list in listElements.iteritems():
             if "TITLE" in data_list[1]:
                 continue
@@ -746,11 +798,11 @@ class guiActions(object):
             if len(data_list) == 3:
                 #special case for size-limit selectors
                 #Remember, we have to undo this on load
-                suffix = self.convertIndex(cur_L_data[data_list[2]])
-                nice_size_limit = str(cur_L_data[element]) + str(suffix)
+                suffix = self.convertIndex(str(cur_L_data_fixed[data_list[2]]))
+                nice_size_limit = str(cur_L_data_fixed[element]) + str(suffix)
                 fixed_L_data[data_list[1]] = nice_size_limit
             else:    
-                fixed_L_data[data_list[1]] = cur_L_data[element]
+                fixed_L_data[data_list[1]] = str(cur_L_data_fixed[element])
         return fixed_L_data
     
     def fixElementsToOptionsLoad(self, loaded_data, listElements, nametextbox):
@@ -784,6 +836,7 @@ class guiActions(object):
     
     def convertIndex(self, index):
         #Changing these types() to isinstance(), comparing to their base classes, would be safer/more reliable.
+        suffix = ""
         if type(index) == str:
             if index == "": suffix = 0
             if index == "KB": suffix = 1
