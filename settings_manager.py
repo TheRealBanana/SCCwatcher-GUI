@@ -3,17 +3,17 @@ from collections import OrderedDict as OD
 from copy import deepcopy as DC
 
 #Tracking the current version from here only, making the change here updates everything.
-_CURRENT_GUI_VERSION_ = "2.0b7"
+_CURRENT_GUI_VERSION_ = "2.0b8"
 #GitHub API url for version infos
 _GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/SCCwatcher-GUI/releases/latest"
 
 #Get ready for tons of lame code
 #The use of OD(), OrderedDict, means that the dictionary we create will be in the exact order as its created.
 #This is useful because we also don't wan't the options in our ini file being saved in any old way, we want an order.
-#The order of options is therefore extremely important. All of the global options must come first before all others.
+#The order of the options below is therefore extremely important. All of the global options must come first before all others.
 
 #Format for the dictionary is this:
-#uiElements[element_name] = [ini_file_section_name, ini_file_option_name]
+#elementsToOptions[element_name] = [ini_file_section_name, ini_file_option_name]
 #The access methods are provided by running a type comparison on an eval of the element_name. Eval'ing turns that name into a proper object which can be type()'d.
 #The type dictionary is kept in elementAccessMethods below elementsToOptions.
 
@@ -78,6 +78,7 @@ elementsToOptions["ggEnableDebugCheck"] = ["GlobalSettings", "DEBUG"]
 
 watchListElements = OD()
 #These special options get processed for each entry in WLGwatchlistItemsList
+#W_TITLE will be replaced automatically with the name of the watch entry
 watchListElements["WLSGwatchNameTextbox"] = ["WSPECIAL", "W_TITLE"]
 watchListElements["WLSGwatchFilterTextbox"] = ["WSPECIAL", "watch_filter"]
 watchListElements["WLSGwatchFilterRegexCheck"] = ["WSPECIAL", "watch_regex"]
@@ -125,10 +126,82 @@ for key, val in avoidListElements.iteritems(): avoidReverse[val[1]] = key
 
 #GUI Defaults
 #These three dicts contain the default state of our application.
+#Consider spreading this definition out into multiple single-line assignments for each entry.
+#Having it all on one line only makes it harder to add entries in the future and makes it difficult to debug faults in this part of the code.
 guiDefaults = {}
-guiDefaults["watchlistDefaults"] = OD([('WLSGwatchNameTextbox', QtCore.QString(u'')), ('WLSGwatchFilterTextbox', QtCore.QString(u'')), ('WLSGwatchFilterRegexCheck', 0), ('WLSGavoidFilterListTextbox', QtCore.QString(u'')), ('WLSGavoidFilterListRegexCheck', 0), ('WLSGwatchCatListTextbox', QtCore.QString(u'')), ('WLSGsavepathTextbox', QtCore.QString(u'')), ('WLSGdupecheckingCheckbox', 0), ('WLSGsizeLimitLowerTextbox', QtCore.QString(u'')), ('WLSGsizeLimitLowerSuffixSelector', 0), ('WLSGsizeLimitUpperTextbox', QtCore.QString(u'')), ('WLSGsizeLimitUpperSuffixSelector', 0), ('WLSGemailCheckbox', 0), ('WLSGftpUploadCheckbox', 0), ('WLSGutWebUiCheckox', 0), ('WLSGenableExternalCmdCheckbox', 0), ('WLSGexternalCommandTextbox', QtCore.QString(u'')), ('WLSGexternalCommandArgsTextbox', QtCore.QString(u''))])
-guiDefaults["avoidlistDefaults"] = OD([('avoidNameTextbox', QtCore.QString(u'')), ('avoidFilterTextbox', QtCore.QString(u'')), ('avoidFilterRegexCheck', 0)])
-guiDefaults["allOtherDefaults"] = OD([('ggMasterAutodlCheck', 0), ('ggEnableVerboseCheck', 0), ('ggVerboseTabTextbox', QtCore.QString(u'')), ('ggBeepCheckbox', 0), ('ggEnableLoggingCheck', 0), ('ggLogpathTextbox', QtCore.QString(u'')), ('ggNetworkDelaySpinbox', 20), ('ggPasskeyTextbox', QtCore.QString(u'')), ('globalDupecheckCheck', 0), ('globalSSLDownloadCheck', 0), ('ggSavepathTextbox', QtCore.QString(u'')), ('globalSizeLimitLowerTextbox', ''), ('globalSizeLimitUpperTextbox', ''), ('globalSizeLimitLowerSuffixSelector', 0), ('globalSizeLimitUpperSuffixSelector', 0), ('globalMaxTriesSpinbox', 0), ('globalRetryWaitSpinbox', 0), ('globalCFBypassUseragentTextbox', QtCore.QString(u'')), ('globalCFBypassCookiefilePathTextbox', QtCore.QString(u'')), ('ftpMasterEnableCheck', 0), ('ftpHostnameTextbox', QtCore.QString(u'')), ('ftpPortTextbox', QtCore.QString(u'')), ('ftpRemoteFolderTextbox', QtCore.QString(u'')), ('ftpUsernameTextbox', QtCore.QString(u'')), ('ftpPasswordTextbox', QtCore.QString(u'')), ('ftpPasvModeCheck', 0), ('ftpTLSModeCheck', 0), ('utwuiMasterEnableTriCheck', 0), ('utwuiUsernameTextbox', QtCore.QString(u'')), ('utwuiPasswordTextbox', QtCore.QString(u'')), ('utwuiHostnameTextbox', QtCore.QString(u'')), ('utwuiPortTextbox', QtCore.QString(u'')), ('emailMasterEnableCheck', 0), ('hostnameIPTextbox', QtCore.QString(u'')), ('portTextbox', QtCore.QString(u'')), ('emailUseTLSCheck', 0), ('usernameTextbox', QtCore.QString(u'')), ('passwordTextbox', QtCore.QString(u'')), ('emailFromTextbox', QtCore.QString(u'')), ('emailToTextbox', QtCore.QString(u'')), ('emailSubjectTextbox', QtCore.QString(u'')), ('emailMessageTextbox', QtCore.QString(u'')), ('extCmdMasterEnableCheck', 0), ('extCmdExeLocation', QtCore.QString(u'')), ('extCmdExeArguments', QtCore.QString(u'')), ('ggEnableDebugCheck', 0)])
+#Global Options
+guiDefaults["allOtherDefaults"] = OD()
+guiDefaults["allOtherDefaults"]["ggMasterAutodlCheck"] = 0
+guiDefaults["allOtherDefaults"]["ggEnableVerboseCheck"] = 0
+guiDefaults["allOtherDefaults"]["ggVerboseTabTextbox"] = ""
+guiDefaults["allOtherDefaults"]["ggBeepCheckbox"] = 0
+guiDefaults["allOtherDefaults"]["ggEnableLoggingCheck"] = 0
+guiDefaults["allOtherDefaults"]["ggLogpathTextbox"] = ""
+guiDefaults["allOtherDefaults"]["ggNetworkDelaySpinbox"] = 20
+guiDefaults["allOtherDefaults"]["ggPasskeyTextbox"] = ""
+guiDefaults["allOtherDefaults"]["globalDupecheckCheck"] = 0
+guiDefaults["allOtherDefaults"]["globalSSLDownloadCheck"] = 0
+guiDefaults["allOtherDefaults"]["ggSavepathTextbox"] = ""
+guiDefaults["allOtherDefaults"]["globalSizeLimitLowerTextbox"] = ""
+guiDefaults["allOtherDefaults"]["globalSizeLimitUpperTextbox"] = ""
+guiDefaults["allOtherDefaults"]["globalSizeLimitLowerSuffixSelector"] = 0
+guiDefaults["allOtherDefaults"]["globalSizeLimitUpperSuffixSelector"] = 0
+guiDefaults["allOtherDefaults"]["globalMaxTriesSpinbox"] = 0
+guiDefaults["allOtherDefaults"]["globalRetryWaitSpinbox"] = 0
+guiDefaults["allOtherDefaults"]["globalCFBypassUseragentTextbox"] = ""
+guiDefaults["allOtherDefaults"]["globalCFBypassCookiefilePathTextbox"] = ""
+guiDefaults["allOtherDefaults"]["ftpMasterEnableCheck"] = 0
+guiDefaults["allOtherDefaults"]["ftpHostnameTextbox"] = ""
+guiDefaults["allOtherDefaults"]["ftpPortTextbox"] = ""
+guiDefaults["allOtherDefaults"]["ftpRemoteFolderTextbox"] = ""
+guiDefaults["allOtherDefaults"]["ftpUsernameTextbox"] = ""
+guiDefaults["allOtherDefaults"]["ftpPasswordTextbox"] = ""
+guiDefaults["allOtherDefaults"]["ftpPasvModeCheck"] = 0
+guiDefaults["allOtherDefaults"]["ftpTLSModeCheck"] = 0
+guiDefaults["allOtherDefaults"]["utwuiMasterEnableTriCheck"] = 0
+guiDefaults["allOtherDefaults"]["utwuiUsernameTextbox"] = ""
+guiDefaults["allOtherDefaults"]["utwuiPasswordTextbox"] = ""
+guiDefaults["allOtherDefaults"]["utwuiHostnameTextbox"] = ""
+guiDefaults["allOtherDefaults"]["utwuiPortTextbox"] = ""
+guiDefaults["allOtherDefaults"]["emailMasterEnableCheck"] = 0
+guiDefaults["allOtherDefaults"]["hostnameIPTextbox"] = ""
+guiDefaults["allOtherDefaults"]["portTextbox"] = ""
+guiDefaults["allOtherDefaults"]["emailUseTLSCheck"] = 0
+guiDefaults["allOtherDefaults"]["usernameTextbox"] = ""
+guiDefaults["allOtherDefaults"]["passwordTextbox"] = ""
+guiDefaults["allOtherDefaults"]["emailFromTextbox"] = ""
+guiDefaults["allOtherDefaults"]["emailToTextbox"] = ""
+guiDefaults["allOtherDefaults"]["emailSubjectTextbox"] = ""
+guiDefaults["allOtherDefaults"]["emailMessageTextbox"] = ""
+guiDefaults["allOtherDefaults"]["extCmdMasterEnableCheck"] = 0
+guiDefaults["allOtherDefaults"]["extCmdExeLocation"] = ""
+guiDefaults["allOtherDefaults"]["extCmdExeArguments"] = ""
+guiDefaults["allOtherDefaults"]["ggEnableDebugCheck"] = 0
+#Watchlist
+guiDefaults["watchlistDefaults"] = OD()
+guiDefaults["watchlistDefaults"]["WLSGwatchNameTextbox"] = ""
+guiDefaults["watchlistDefaults"]["WLSGwatchFilterTextbox"] = ""
+guiDefaults["watchlistDefaults"]["WLSGwatchFilterRegexCheck"] = 0
+guiDefaults["watchlistDefaults"]["WLSGavoidFilterListTextbox"] = ""
+guiDefaults["watchlistDefaults"]["WLSGavoidFilterListRegexCheck"] = 0
+guiDefaults["watchlistDefaults"]["WLSGwatchCatListTextbox"] = ""
+guiDefaults["watchlistDefaults"]["WLSGsavepathTextbox"] = ""
+guiDefaults["watchlistDefaults"]["WLSGdupecheckingCheckbox"] = 0
+guiDefaults["watchlistDefaults"]["WLSGsizeLimitLowerTextbox"] = ""
+guiDefaults["watchlistDefaults"]["WLSGsizeLimitLowerSuffixSelector"] = 0
+guiDefaults["watchlistDefaults"]["WLSGsizeLimitUpperTextbox"] = ""
+guiDefaults["watchlistDefaults"]["WLSGsizeLimitUpperSuffixSelector"] = 0
+guiDefaults["watchlistDefaults"]["WLSGemailCheckbox"] = 0
+guiDefaults["watchlistDefaults"]["WLSGftpUploadCheckbox"] = 0
+guiDefaults["watchlistDefaults"]["WLSGutWebUiCheckox"] = 0
+guiDefaults["watchlistDefaults"]["WLSGenableExternalCmdCheckbox"] = 0
+guiDefaults["watchlistDefaults"]["WLSGexternalCommandTextbox"] = ""
+guiDefaults["watchlistDefaults"]["WLSGexternalCommandArgsTextbox"] = ""
+#Avoidlist
+guiDefaults["avoidlistDefaults"] = OD()
+guiDefaults["avoidlistDefaults"]["avoidNameTextbox"] = ""
+guiDefaults["avoidlistDefaults"]["avoidFilterTextbox"] = ""
+guiDefaults["avoidlistDefaults"]["avoidFilterRegexCheck"] = 0
 
 #These are for tracking GUI changes
 guiState = {}
@@ -162,6 +235,7 @@ class sccwSettingsManager:
         
     def syncData(self):
         #Commit all settings to file
+        #Only reason I made this its own function was in anticipation of a need to do other stuff on sync.
         self.appSettings.sync()
     
     def openSettingsFile(self, filename):
@@ -196,7 +270,7 @@ class sccwSettingsManager:
         
         #Sync data. It works without this because sync() is automatically called on the destruction of the QSettings object, which happens at close.
         #Id rather do it now though.
-        self.syncData()
+        self.syncData() 
 
     def loadSettings(self):
         returnData = OD()
@@ -214,7 +288,7 @@ class sccwSettingsManager:
                 item = self.appSettings.value(value).toPyObject()
                 if type(item) is QtCore.QStringList:
                     returnData[subgroup][value] = []
-                    for x in xrange(len(item)):
+                    for x in xrange(len(item)):  #Why xrange and not iterate over the QStringList itself ('for x in item')?
                         returnData[subgroup][value].append(str(item[x]))
                 else:
                     returnData[subgroup][value] = str(item)

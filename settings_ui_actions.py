@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # wanted to move all the ui functions into their own file to make everything look nicer
-# otherwise the settings_ui.py file is going to get really crowded.
+# otherwise the settings_ui.py file was going to get really crowded.
 from collections import OrderedDict as OD
+from numbers import Number
 #from collections import namedtuple as NT
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
@@ -156,7 +157,7 @@ class guiActions(object):
             #Now loop over the items in the list_object and check for differences one by one. (is there a better way?)
             for cur_index in xrange(0, list_object.count()):
                 cur_item = list_object.item(cur_index)
-                if cur_item == 0:
+                if cur_item == 0: #Could this cause sccwatcher to think a file has no changes when it does, or vice versa, because an item was skipped?
                     continue
                 cur_item_title = str(cur_item.text())
                 cur_item_title = cur_item_title.replace(" ", "_")
@@ -167,9 +168,15 @@ class guiActions(object):
                 #So this name exists in the check_dict dict, we have to check every option now.
                 cur_item_data = cur_item.data(Qt.UserRole).toPyObject()
                 for cid_option, cid_value in cur_item_data.iteritems():
+                    try:
+                        check_dict[cur_item_title][cid_option]
+                    except:
+                        if cid_value != "" and cid_value != 0:
+                            return True
                     if str(cid_value) != str(check_dict[cur_item_title][cid_option]):
                         return True
         else:
+            #Size is wrong so we know its not the same.
             return True
     
     def checkUiStateChange(self):
@@ -212,8 +219,10 @@ class guiActions(object):
         #This will allow us to detect whether or not a user has changed anything in the program since the last save/load operation
         
         globalOptions = self.context.SettingsManager.guiState["globalOptionsState"]
-        wlOptions = self.context.SettingsManager.guiState["watchlistState"]
-        alOptions = self.context.SettingsManager.guiState["avoidlistState"]
+        wlOptions = OD()
+        self.context.SettingsManager.guiState["watchlistState"] = wlOptions
+        alOptions = OD()
+        self.context.SettingsManager.guiState["avoidlistState"] = alOptions
         watchlist = self.context.WLGwatchlistItemsList
         avoidlist = self.context.avoidlistItemsList
         
@@ -264,12 +273,15 @@ class guiActions(object):
         #And now we remove our watch item from the QListWidget. This also removes any temporary data associated with this item at the same time.
         removed_item = access_object.takeItem(current_selection_index)
         del(removed_item) #Sometimes I don't trust the GC, and it can't hurt to be sure.
+        #Update everything with the change
+        #self.saveAllWatchlistItems()
+        
         
     def addWatchListItem(self):
         #This function will add a new list item to the watch list
         #First thing we do is make a copy of the defaults for the watchlist, then populate it with values from the general options
-        #I am wondering now whether or not making a new deep copy each time we add a list item is a good idea or not. Might lead to a memory leak.
-        #We should instead create the structure once and then update the values as needed.
+        #I am wondering now whether or not making a new deep copy each time we add a list item is a good idea or not. Might lead to a memory leak. Hopefully the GC is doin its job.
+        #Maybe we should instead create the structure once and then update the values as needed, although this has its own issues (like vestigial options, somehow lol, I dunno)
         updated_wl_defaults = DC(self.context.SettingsManager.guiDefaults["watchlistDefaults"])
         updated_wl_defaults["WLSGsavepathTextbox"] = self.context.ggSavepathTextbox.text()
         updated_wl_defaults["WLSGexternalCommandTextbox"] = self.context.extCmdExeLocation.text()
@@ -314,7 +326,7 @@ class guiActions(object):
         #Finally we reenable sorting, if it was enabled before
         access_object.setSortingEnabled(__sortingEnabled)
     
-    def checkForDuplicates(self, access_object, item_text, alt_match=None): #I hate doing this, adding params as needed
+    def checkForDuplicates(self, access_object, item_text, alt_match=None): #I hate adding params as needed
         #This function will look for duplicate entries in the QWidgetList supplied as access_object
         #If any duplicates are detected the item_text has a number appended to it (or has its appended number incremented) and is returned
         
@@ -415,7 +427,7 @@ class guiActions(object):
         
     #These three functions deal with saving, clearing, and loading from watchlists.
     def saveListData(self, listwidget_elements, listwidget_item):
-        item_save_data = OD()
+        item_save_data = DC(self.context.SettingsManager.guiDefaults["watchlistDefaults"])
         
         #Loop through each item in listwidget_elements
         for element in listwidget_elements:
@@ -450,8 +462,18 @@ class guiActions(object):
         for element, data in new_data.iteritems():
             live_element = eval("self.context." + str(element))
             write_function, datatype = self.typeMatcher(live_element, "WRITE")
-            if datatype == "str": data = str(data)
-            if datatype == "int": data = int(data)
+            #Handle all checkboxes that aren't tristate. This just converts the 1's to 2's.
+            if "QCheckBox" in str(type(live_element)):
+                if element != "utwuiMasterEnableTriCheck" and element != "WLSGutWebUiCheckox":
+                    if int(data) == 1:
+                        data = 2
+            if datatype == "str":
+                data = str(data)
+            if datatype == "int":
+                try:
+                    data = int(data)
+                except:
+                    data = 0
             #And now we update the element with the new data
             write_function(data)
 
@@ -509,6 +531,10 @@ class guiActions(object):
         loaded_data = self.context.SettingsManager.loadSettings()
         #We have to convert the ini option names back into the element object's name.
         converted_data = OD()
+        #Set the initial state of the data to the blank-slate defaults. This will catch any options the user forgot to include
+        #converted_data["GlobalSettings"] = DC(self.context.SettingsManager.guiDefaults["allOtherDefaults"])
+        #converted_data["watch"] = DC(self.context.SettingsManager.guiDefaults["watchlistDefaults"])
+        #converted_data["avoid"] = DC(self.context.SettingsManager.guiDefaults["avoidlistDefaults"])
         
         #Check if we have the correct settings, if not notify the user and discontinue current operation
         if loaded_data.has_key("GlobalSettings") is False:
@@ -530,11 +556,15 @@ class guiActions(object):
             #While the below seems odd and roundaboutish for simple retrieving of data, I needed to be able to match a dict key against a string that
             #might not be the same case. If I just .lower'd() everything it would make the configs look ugly without caps differentiating the words.
             #At some point, no matter the solution, the lowercase keys must somehow be matched against the cased keys. We then need to return the cased key.
+            cased_key = ""
             for i in keys_to_match:
                 match_string = re.search("(" + str(key) + ")", i, re.I)
                 if match_string is not None:
                     #Got our cased key
                     cased_key = match_string.group(1)
+            if len(cased_key) == 0:
+                print "SCCv2GUI.ERROR: Couldn't match cased_key against REVelementsToOptions. Erronious entry: %s" % (key,)
+                continue
             
             objectname = self.context.SettingsManager.REVelementsToOptions[cased_key]
             converted_data["GlobalSettings"][str(objectname)] = value
@@ -547,8 +577,11 @@ class guiActions(object):
         converted_data["avoid"] = OD()
         
         for key, val in loaded_data.iteritems():
-            if key[0] == "-": converted_data["avoid"][key] = val
-            else: converted_data["watch"][key] = val
+            if key[0] == "-":
+                converted_data["avoid"][key] = val
+            else:
+                converted_data["watch"][key] = val
+                
             
 
         #Ok now converted_data has three subdicts called: GlobalSettings, watch, and avoid.
@@ -561,6 +594,10 @@ class guiActions(object):
             if converted_data["GlobalSettings"].has_key(element) is False:
                 continue
             data = converted_data["GlobalSettings"][element]
+            
+            #Check if there is any data. If there isn't, then the defaults will kick in again
+            if len(data) == 0:
+                continue
             
             #Make a live access object from element and then use its type to get our access function
             access_string = "self.context." + str(element)
@@ -583,7 +620,7 @@ class guiActions(object):
                     continue
                 #Split up the data into two part, prefix and suffix
                 try:
-                    prefix, suffix = re.match("([0-9]{1,9})([A-Za-z]{0,2})", data).groups()
+                    prefix, suffix = re.match("([0-9]{1,9})(?:.*)([A-Za-z]{2})", data).groups()
                     if len(suffix) > 0:
                         suffix = self.convertIndex(suffix)
                     
@@ -719,8 +756,10 @@ class guiActions(object):
             access_string = "self.context." + str(element)
             live_access_string = eval(access_string)
             #And now we send it to the type checker and set our save_data to its output
-            if len(data_list) == 3: read_data = self.typeMatcher(live_access_string, "SLC_READ", data_list[2])
-            else: read_data = self.typeMatcher(live_access_string, "READ")()
+            if len(data_list) == 3:
+                read_data = self.typeMatcher(live_access_string, "SLC_READ", data_list[2])
+            else:
+                read_data = self.typeMatcher(live_access_string, "READ")()
             save_data[subgroupName][optionName] = read_data
         
         #Now we get the data associated with each watchlist item and save it in our save_data dict
@@ -798,11 +837,16 @@ class guiActions(object):
             if len(data_list) == 3:
                 #special case for size-limit selectors
                 #Remember, we have to undo this on load
+                
                 suffix = self.convertIndex(str(cur_L_data_fixed[data_list[2]]))
                 nice_size_limit = str(cur_L_data_fixed[element]) + str(suffix)
                 fixed_L_data[data_list[1]] = nice_size_limit
-            else:    
-                fixed_L_data[data_list[1]] = str(cur_L_data_fixed[element])
+            else:
+                try:
+                    fixed_L_data[data_list[1]] = str(cur_L_data_fixed[element])
+                except:
+                    print "Missing option in watch entry data, ignoring %s..." % element
+                    
         return fixed_L_data
     
     def fixElementsToOptionsLoad(self, loaded_data, listElements, nametextbox):
@@ -813,13 +857,17 @@ class guiActions(object):
                 continue
             
             option_name = data_list[1]
-            data = loaded_data[option_name]
-            
+            try:
+                data = loaded_data[option_name]
+            except:
+                #missing option, fill in with blank data
+                continue
+                
             if len(data_list) == 3:
                 #special case for size-limit selectors
                 #Split the data into two different items
                 try:
-                    prefix, suffix = re.match("([0-9]{1,9})([A-Za-z]{2})", data).groups()
+                    prefix, suffix = re.match("([0-9]{1,9})(?:.*)([A-Za-z]{2})", data).groups()
                     suffix = self.convertIndex(suffix)
                 except:
                     #This option was probably not set by the user so we ignore it too by setting the prefix and suffix to default
@@ -836,13 +884,20 @@ class guiActions(object):
     
     def convertIndex(self, index):
         #Changing these types() to isinstance(), comparing to their base classes, would be safer/more reliable.
-        suffix = ""
-        if type(index) == str:
+        suffix = "ERROR"
+        
+        #Gettin rid of teh errors
+        try:
+            index = int(index)
+        except:
+            pass
+        
+        if isinstance(index, basestring):
             if index == "": suffix = 0
             if index == "KB": suffix = 1
             if index == "MB": suffix = 2
             if index == "GB": suffix = 3
-        if type(index) == int:
+        if isinstance(index, Number):
             if index == 0: suffix = ""
             if index == 1: suffix = "KB"
             if index == 2: suffix = "MB"
@@ -1016,6 +1071,7 @@ class guiActions(object):
         self.context.utwuiStateLabel.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:%s;\">%s</span></p></body></html>" % (color, text), None))
         
         #I wonder if setEnabled can take a simple 0/1 int so we don't have to do this compare
+        #We could just bool() it since 0 is false and anything else is true
         if state > 0: state = True
         else: state = False
         self.context.utwuiHostnameTextbox.setEnabled(state)
