@@ -171,7 +171,7 @@ class guiActions(object):
                     try:
                         check_dict[cur_item_title][cid_option]
                     except:
-                        if cid_value != "" and cid_value != 0:
+                        if cid_value != "" and cid_value != 0 and str(cid_value) != "0":
                             return True
                     if str(cid_value) != str(check_dict[cur_item_title][cid_option]):
                         return True
@@ -218,13 +218,19 @@ class guiActions(object):
         #This function will loop through all the GUI options, saving the state of all objects.
         #This will allow us to detect whether or not a user has changed anything in the program since the last save/load operation
         
-        globalOptions = self.context.SettingsManager.guiState["globalOptionsState"]
+        #Was worried that somehow there would still be an active ref to the old state info so I decided to del() it first
+        del(self.context.SettingsManager.guiState["watchlistState"])
+        del(self.context.SettingsManager.guiState["avoidlistState"])
+        
         wlOptions = OD()
-        self.context.SettingsManager.guiState["watchlistState"] = wlOptions
         alOptions = OD()
+        
+        self.context.SettingsManager.guiState["watchlistState"] = wlOptions
         self.context.SettingsManager.guiState["avoidlistState"] = alOptions
         watchlist = self.context.WLGwatchlistItemsList
         avoidlist = self.context.avoidlistItemsList
+        
+        globalOptions = self.context.SettingsManager.guiState["globalOptionsState"]
         
         #Global options
         for element, old_data in globalOptions.iteritems():
@@ -356,6 +362,7 @@ class guiActions(object):
         #No titles matched so we don't have a dupe. We return the correct item_text to confirm this.
         return item_text
     
+    
     #Update functions for when anything is changed for a watchlist or avoidlist item.
     #These two functions save all the data for the item, not just the piece of data that has changed.
     def saveAllAvoidlistItems(self):
@@ -371,6 +378,8 @@ class guiActions(object):
         
         #Get the current avoidlist item
         current_list_item = access_object.currentItem()
+        if current_list_item is None:
+            return
         
         #First thing we do is make sure the title isnt a dupe.
         #We run the title through a dupe checker and return a new title if necessary
@@ -532,7 +541,7 @@ class guiActions(object):
         #We have to convert the ini option names back into the element object's name.
         converted_data = OD()
         #Set the initial state of the data to the blank-slate defaults. This will catch any options the user forgot to include
-        #converted_data["GlobalSettings"] = DC(self.context.SettingsManager.guiDefaults["allOtherDefaults"])
+        converted_data["GlobalSettings"] = DC(self.context.SettingsManager.guiDefaults["allOtherDefaults"])
         #converted_data["watch"] = DC(self.context.SettingsManager.guiDefaults["watchlistDefaults"])
         #converted_data["avoid"] = DC(self.context.SettingsManager.guiDefaults["avoidlistDefaults"])
         
@@ -573,16 +582,57 @@ class guiActions(object):
         #Clean up loaded_data so we are left with just watches and avoids.
         del(loaded_data["GlobalSettings"])
         
+        
+        
+        tmpwatch = OD()
+        tmpavoid = OD()
         converted_data["watch"] = OD()
         converted_data["avoid"] = OD()
         
+        
+        #Sort the watches and avoids as well as fix the casing on options, like the global options above
+        #Again, this isn't elegant but I'm done with elegant. Now I just want this working and done.
         for key, val in loaded_data.iteritems():
             if key[0] == "-":
-                converted_data["avoid"][key] = val
+                #Avoid item
+                tmpavoid[key] = val
             else:
-                converted_data["watch"][key] = val
+                #Watch item
+                tmpwatch[key] = val
+        
+        #Watchlist first
+        for entry in tmpwatch:
+            converted_data["watch"][entry] = OD()
+            for key, value in tmpwatch[entry].iteritems():
+                cased_key = ""
+                for i in self.context.SettingsManager.REVwatchListElements.keys():
+                    match_string = re.search("(" + str(key) + ")", i, re.I)
+                    if match_string is not None:
+                        cased_key = match_string.group(1)
+                if len(cased_key) == 0:
+                    print "SCCv2GUI.ERROR: Couldn't match cased_key against REVwatchListElements. Erronious entry: %s" % (key,)
+                    continue
+                converted_data["watch"][entry][cased_key] = value
                 
-            
+        #Avoidlist second. And yes I know this should probably be its own function but its being used twice and I'm super braindead right now
+        #If it works it works, JUST DO IT
+        for entry in tmpavoid:
+            converted_data["avoid"][entry] = OD()
+            for key, value in tmpavoid[entry].iteritems():
+                cased_key = ""
+                for i in self.context.SettingsManager.REVavoidListElements.keys():
+                    match_string = re.search("(" + str(key) + ")", i, re.I)
+                    if match_string is not None:
+                        cased_key = match_string.group(1)
+                if len(cased_key) == 0:
+                    print "SCCv2GUI.ERROR: Couldn't match cased_key against REVavoidListElements. Erronious entry: %s" % (key,)
+                    continue
+                objectname = self.context.SettingsManager.REVavoidListElements[cased_key]
+                converted_data["avoid"][entry][cased_key] = value
+        
+        #Remove temp stuffs
+        del(tmpavoid)
+        del(tmpwatch)
 
         #Ok now converted_data has three subdicts called: GlobalSettings, watch, and avoid.
         #We now go about the business of setting the GUI up with the loaded data.
@@ -620,7 +670,7 @@ class guiActions(object):
                     continue
                 #Split up the data into two part, prefix and suffix
                 try:
-                    prefix, suffix = re.match("([0-9]{1,9})(?:.*)([A-Za-z]{2})", data).groups()
+                    prefix, suffix = re.match("([0-9]{1,9})(?:\s+)?([A-Za-z]{2})?", data).groups()
                     if len(suffix) > 0:
                         suffix = self.convertIndex(suffix)
                     
@@ -665,6 +715,13 @@ class guiActions(object):
             self.context.WLGwatchlistItemsList.setSortingEnabled(__sortingEnabled)
             #Fix the data's options name so they are element names
             item_data = self.fixElementsToOptionsLoad(item_data, self.context.SettingsManager.watchListElements, ["WLSGwatchNameTextbox", item_name])
+            
+            #I hate doing this but sometimes you just have to fix something the hard way. Loop through the data and add in any missing defaults:
+            missing_keys = [key for key in self.context.SettingsManager.guiDefaults["watchlistDefaults"].keys() if key not in item_data.keys()]
+            for key in missing_keys:
+                print "WARNING, ADDING IN DEFAULT KEY FOR %s ON WATCH %s" % (key, item_name)
+                item_data[key] = self.context.SettingsManager.guiDefaults["watchlistDefaults"][key]
+            
             #Add the data to the item for the user role. We're using a new item to be sure
             actual_item = self.context.WLGwatchlistItemsList.findItems(item_name, Qt.MatchFixedString)[0]
             actual_item.setData(Qt.UserRole, item_data)
@@ -867,7 +924,7 @@ class guiActions(object):
                 #special case for size-limit selectors
                 #Split the data into two different items
                 try:
-                    prefix, suffix = re.match("([0-9]{1,9})(?:.*)([A-Za-z]{2})", data).groups()
+                    prefix, suffix = re.match("([0-9]{1,9})(?:\s+)?([A-Za-z]{2})?", data).groups()
                     suffix = self.convertIndex(suffix)
                 except:
                     #This option was probably not set by the user so we ignore it too by setting the prefix and suffix to default
@@ -891,6 +948,9 @@ class guiActions(object):
             index = int(index)
         except:
             pass
+        
+        if index is None:
+            index = ""
         
         if isinstance(index, basestring):
             if index == "": suffix = 0
@@ -1072,8 +1132,11 @@ class guiActions(object):
         
         #I wonder if setEnabled can take a simple 0/1 int so we don't have to do this compare
         #We could just bool() it since 0 is false and anything else is true
-        if state > 0: state = True
-        else: state = False
+        if state > 0:
+            state = True
+        else:
+            state = False
+            
         self.context.utwuiHostnameTextbox.setEnabled(state)
         self.context.utwuiPortTextbox.setEnabled(state)
         self.context.utwuiUsernameTextbox.setEnabled(state)
@@ -1156,7 +1219,7 @@ class guiActions(object):
         
 
     def quitApp(self):
-        #Basially the same as new, except we then quit after that
+        #Basically the same as new, except we then quit after that
         if self.newSettingsFile():
             #User wants to quit
             self.context.MainWindow._user_accept_close = True
