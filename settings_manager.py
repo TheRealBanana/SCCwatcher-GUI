@@ -3,7 +3,7 @@ from collections import OrderedDict as OD
 from copy import deepcopy as DC
 
 #Tracking the current version from here only, making the change here updates everything.
-_CURRENT_GUI_VERSION_ = "2.0b8"
+_CURRENT_GUI_VERSION_ = "2.0b9"
 #GitHub API url for version infos
 _GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/SCCwatcher-GUI/releases/latest"
 
@@ -203,6 +203,20 @@ guiDefaults["avoidlistDefaults"]["avoidNameTextbox"] = ""
 guiDefaults["avoidlistDefaults"]["avoidFilterTextbox"] = ""
 guiDefaults["avoidlistDefaults"]["avoidFilterRegexCheck"] = 0
 
+#Defaults for the script status indicator
+scriptStatusDefaults = {}
+scriptStatusDefaults["version"] = "Not Running"
+scriptStatusDefaults["autodlstatus"] = "N/A"
+scriptStatusDefaults["ssl"] = "N/A"
+scriptStatusDefaults["max_dl_tries"] = "N/A"
+scriptStatusDefaults["retry_wait"] = "N/A"
+scriptStatusDefaults["cf_workaround"] = "N/A"
+scriptStatusDefaults["dupecheck"] = "N/A"
+scriptStatusDefaults["logging"] = "N/A"
+scriptStatusDefaults["verbose"] = "N/A"
+scriptStatusDefaults["recent_list_size"] = "N/A"
+scriptStatusDefaults["wl_al_size"] = "N/A"
+
 #These are for tracking GUI changes
 guiState = {}
 guiState["globalOptionsState"] = DC(guiDefaults["allOtherDefaults"])
@@ -220,6 +234,7 @@ class sccwSettingsManager:
         self.REVwatchListElements = watchReverse
         self.REVavoidListElements = avoidReverse
         self.guiDefaults = guiDefaults
+        self.scriptStatusDefaults = scriptStatusDefaults
         self.guiState = guiState
         #These two below are functions
         self.windowPos = MWloc[0]

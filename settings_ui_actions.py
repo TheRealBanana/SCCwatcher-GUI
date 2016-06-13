@@ -12,6 +12,9 @@ from ntpath import basename as ntpath_basename
 from urllib import urlopen
 from ast import literal_eval as safe_eval
 import re
+from tempfile import gettempdir
+from os import sep as OS_SEP
+import cPickle
 
 try:
     _encoding = QtGui.QApplication.UnicodeUTF8
@@ -31,6 +34,7 @@ def regexValidator(expr):
     except:
         return False
 
+
 class guiActions(object):
     def __init__(self, context):
         self.context = context
@@ -38,7 +42,47 @@ class guiActions(object):
         #This just flags during the load operation itself and gives no indication as to whether or not something is currently loaded.
         self.__is_loading = False
 
+    
+    def setLabelAndColor(self, element, status):
+        if str(status).lower() == "on":
+            print "ON"
+            stylesheet = "<html><head/><body><p align=\"center\"><span style=\" font-weight:600; color:#00c800;\">On</span></p></body></html>"
+        elif str(status).lower() == "off" or str(status).lower() == "Not Running" or str(status).lower() == "n/a":
+            print "OFF"
+            stylesheet = "<html><head/><body><p align=\"center\"><span style=\" font-weight:600; color:#ff0000;\">Off</span></p></body></html>"
+        else:
+            stylesheet = "<html><head/><body><p align=\"center\"><span style=\" font-weight:600; color:#000000;\">%s</span></p></body></html>" % (status)
         
+        #Now set the element with its data
+        element.setText(stylesheet)
+    
+    def getScriptStatus(self):
+        #Simple function to get the current script status, if its available
+        tmpname =  gettempdir() + OS_SEP + "sccw_temp.txt"
+        
+        try:
+            tempfile = open(tmpname, 'r')
+            pickleData = tempfile.read()
+            tempfile.close()
+            script_status = cPickle.loads(pickleData)
+            if len(script_status) < 10:
+                script_status = self.context.SettingsManager.scriptStatusDefaults
+        except:
+            script_status = self.context.SettingsManager.scriptStatusDefaults
+        #Now we update the main page with our data
+        self.setLabelAndColor(self.context.ssVersionState, script_status["version"])
+        self.setLabelAndColor(self.context.ssStatusState, script_status["autodlstatus"])
+        self.setLabelAndColor(self.context.ssSSLDownloadState, script_status["ssl"])
+        self.setLabelAndColor(self.context.ssMaxTriesState, script_status["max_dl_tries"])
+        self.setLabelAndColor(self.context.ssRetryDelayState, script_status["retry_wait"])
+        self.setLabelAndColor(self.context.ssCloudflareState, script_status["cf_workaround"])
+        self.setLabelAndColor(self.context.ssDupecheckingState, script_status["dupecheck"])
+        self.setLabelAndColor(self.context.ssLoggingState, script_status["logging"])
+        self.setLabelAndColor(self.context.ssVerboseState, script_status["verbose"])
+        self.setLabelAndColor(self.context.ssRecentState, script_status["recent_list_size"])
+        self.setLabelAndColor(self.context.ssWatchAvoidState, script_status["wl_al_size"])
+        
+    
     def checkRegexContent(self, pElement, pCheckbox):
         #This is a generic function for each box supporting regular expressions.
         #You can just connect the finishedEditing() signal to this function, using partial to fill in the variables.
@@ -279,9 +323,7 @@ class guiActions(object):
         #And now we remove our watch item from the QListWidget. This also removes any temporary data associated with this item at the same time.
         removed_item = access_object.takeItem(current_selection_index)
         del(removed_item) #Sometimes I don't trust the GC, and it can't hurt to be sure.
-        #Update everything with the change
-        #self.saveAllWatchlistItems()
-        
+
         
     def addWatchListItem(self):
         #This function will add a new list item to the watch list
@@ -376,7 +418,7 @@ class guiActions(object):
         if self.__is_loading is True:
             return
         
-        #Get the current avoidlist item
+        #Get the current list item
         current_list_item = access_object.currentItem()
         if current_list_item is None:
             return
@@ -391,8 +433,7 @@ class guiActions(object):
         item_title_object.setText(cur_title)
         
         #Now call the saveListData() function with the avoidlist elements and objects passed
-        if "Untitled Entry" not in str(current_list_item.text()):
-            self.saveListData(elements_list, current_list_item)
+        self.saveListData(elements_list, current_list_item)
 
     #These Three functions save the data associated with each watch or avoid item whenever the user switches watch items.
     #The third is the master function while the other two just provide unique data tot he master.
@@ -1224,13 +1265,6 @@ class guiActions(object):
             #User wants to quit
             self.context.MainWindow._user_accept_close = True
             self.context.MainWindow.close()
-    
-    def getScriptStatus(self):
-        #This function connects to scc.py using a simple FIFO
-        #This side only needs to be a client so not too bad.
-        pass
-        
-        
     
     
     

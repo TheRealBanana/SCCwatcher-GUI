@@ -1048,9 +1048,13 @@ class Ui_sccw_SettingsUI(object):
         sccw_SettingsUI.setTabOrder(self.agAboutTextbox, self.ugCheckUpdateButton)
         sccw_SettingsUI.setTabOrder(self.ugCheckUpdateButton, self.buttonBox)
         
-            
-    
-    
+        #Set up timer to constantly check script status. 5 seconds seems fine
+        self.timer = QtCore.QTimer()
+        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.guiActions.getScriptStatus)
+        self.timer.start(5000)
+        #Get first run out of the way
+        self.guiActions.getScriptStatus()
+        
     def retranslateUi(self, sccw_SettingsUI):
         sccw_SettingsUI.setWindowTitle(_translate("sccw_SettingsUI", "SCCwatcher - New Settings File", None))
         
