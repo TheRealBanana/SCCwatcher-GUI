@@ -45,10 +45,8 @@ class guiActions(object):
     
     def setLabelAndColor(self, element, status):
         if str(status).lower() == "on":
-            print "ON"
             stylesheet = "<html><head/><body><p align=\"center\"><span style=\" font-weight:600; color:#00c800;\">On</span></p></body></html>"
         elif str(status).lower() == "off" or str(status).lower() == "Not Running" or str(status).lower() == "n/a":
-            print "OFF"
             stylesheet = "<html><head/><body><p align=\"center\"><span style=\" font-weight:600; color:#ff0000;\">Off</span></p></body></html>"
         else:
             stylesheet = "<html><head/><body><p align=\"center\"><span style=\" font-weight:600; color:#000000;\">%s</span></p></body></html>" % (status)
