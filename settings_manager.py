@@ -3,7 +3,7 @@ from collections import OrderedDict as OD
 from copy import deepcopy as DC
 
 #Tracking the current version from here only, making the change here updates everything.
-_CURRENT_GUI_VERSION_ = "2.0b10"
+_CURRENT_GUI_VERSION_ = "2.0b11"
 #GitHub API url for version infos
 _GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/SCCwatcher-GUI/releases/latest"
 
@@ -156,7 +156,7 @@ guiDefaults["allOtherDefaults"]["ftpPortTextbox"] = ""
 guiDefaults["allOtherDefaults"]["ftpRemoteFolderTextbox"] = ""
 guiDefaults["allOtherDefaults"]["ftpUsernameTextbox"] = ""
 guiDefaults["allOtherDefaults"]["ftpPasswordTextbox"] = ""
-guiDefaults["allOtherDefaults"]["ftpPasvModeCheck"] = 0
+guiDefaults["allOtherDefaults"]["ftpPasvModeCheck"] = 2
 guiDefaults["allOtherDefaults"]["ftpTLSModeCheck"] = 0
 guiDefaults["allOtherDefaults"]["utwuiMasterEnableTriCheck"] = 0
 guiDefaults["allOtherDefaults"]["utwuiUsernameTextbox"] = ""

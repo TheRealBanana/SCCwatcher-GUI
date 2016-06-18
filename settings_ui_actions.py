@@ -1213,19 +1213,24 @@ class guiActions(object):
         curver = [cregex.group("major"), cregex.group("sep"), cregex.group("minor")]
         latestver = [rregex.group("major"), rregex.group("sep"), rregex.group("minor")]
         
-        #Now test all parts at once
-        for cur, latest in zip(curver, latestver):
-            if cur == latest:
-                    continue
-            if cur is None:
-                    return False
-            if latest is None:
-                    return True
-            if cur > latest:
-                    return False
-            if cur < latest: 
-                    return True
-            
+        if self.context.SettingsManager.CURRENT_GUI_VERSION == latest:
+            return False
+        if float(curver[0]) < float(latestver[0]): 
+            return True
+        if float(curver[0]) > float(latestver[0]): 
+            return False
+        if latestver[1] is not None:
+            if curver[1] is None:
+                return False
+        if curver[1] is not None:
+            if latestver[1] is None:
+                return True
+        if curver[1] > latestver[1]:
+            return False
+        if curver[1] < latestver[1]:
+            return True
+        if int(curver[2]) < int(latestver[2]):
+            return True
         return False
 
     def checkForUpdates(self):

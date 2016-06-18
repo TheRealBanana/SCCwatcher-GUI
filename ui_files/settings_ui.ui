@@ -76,7 +76,7 @@
      </font>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="mainTab">
      <attribute name="title">
@@ -1062,7 +1062,7 @@ See whatsmyuseragent.com to get your useragent string.</string>
         <rect>
          <x>15</x>
          <y>20</y>
-         <width>181</width>
+         <width>161</width>
          <height>17</height>
         </rect>
        </property>
@@ -1073,7 +1073,7 @@ Half checked means both the normal download and the WebUI Upload are executed.
 Fully checked means only the WebUI Upload function is used. No torrent will be downloaded locally.</string>
        </property>
        <property name="text">
-        <string>uTorrent WebUI Uploader Mode:</string>
+        <string>uTorrent WebUI Upload Mode:</string>
        </property>
        <property name="tristate">
         <bool>true</bool>
@@ -1082,9 +1082,9 @@ Fully checked means only the WebUI Upload function is used. No torrent will be d
       <widget class="QLabel" name="utwuiStateLabel">
        <property name="geometry">
         <rect>
-         <x>210</x>
-         <y>21</y>
-         <width>56</width>
+         <x>185</x>
+         <y>20</y>
+         <width>166</width>
          <height>16</height>
         </rect>
        </property>
