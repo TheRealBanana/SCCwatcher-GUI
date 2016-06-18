@@ -872,6 +872,8 @@ class Ui_sccw_SettingsUI(object):
         self.tabWidget.setCurrentIndex(0)
         
         ## Slot connectors ##
+        #File drag-and-drop support
+        QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("gotFileDrop"), self.guiActions.fileDropAction)
         #Closing signal
         #So apparently we can use the signal QApplication::aboutToQuit(void)
         QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("appClosing"), self.guiActions.quitApp)
@@ -1211,7 +1213,7 @@ class Ui_sccw_SettingsUI(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%dlpath%</span><span style=\" font-size:8pt;\"> - The path the torrent was saved to locally (if it wasnt saved locally, this is NONE)</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%ulpath%</span><span style=\" font-size:8pt;\"> - The hostname/port/dir path of the ftp server set in scc.ini. I.e. ftp://ftp.myserver.com:21/torrents</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%utserver%</span><span style=\" font-size:8pt;\"> - The hostname/port of the uTorrent WebUI server set in scc.ini. I.e. myserver.com:55124</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%tag%</span><span style=\" font-size:8pt;\"> - This will be the text inside of a watches tag, (if the watch has one). If the watch does not have a tag, this will be the word: None</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%watchname%</span><span style=\" font-size:8pt;\"> - This will be the text inside of a watches tag, (if the watch has one). If the watch does not have a tag, this will be the word: None</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%torrentpath%</span><span style=\" font-size:8pt;\"> - Complete path to the .torrent file downloaded, including the filename and extension.</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%sccgrptree%</span><span style=\" font-size:8pt;\"> - mimics the functionality of SCCGRPTREE</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; color:#b037b0;\">%sccgrp%</span><span style=\" font-size:8pt;\"> - mimics the functionality of SCCGRP</span></p>\n"

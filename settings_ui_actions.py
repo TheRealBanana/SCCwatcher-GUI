@@ -541,7 +541,7 @@ class guiActions(object):
             del(removed_item) #Sometimes I don't trust the GC, and it can't hurt to be sure.
     
     
-    def loadUiState(self):
+    def loadUiState(self, dd_filename=None):
         #Takes in the data format of loadSettings() and updates the UI with the data received
         #We will go through data{} and use the access method detailed in the uiElements dictionary.
         #The two's structure are identical, making this task extremely simple.
@@ -563,7 +563,12 @@ class guiActions(object):
         
         #Now that we have either saved or discared any changes made, we prompt the user to open up a new file
         #Get the new file name and tell the SettingsManager to update its QSettings object to use the new file location
-        filename = self.browse_button_loadFile()
+        #We bypass this part of the user drag-and-drop'd a file
+        if dd_filename is not None:
+            filename = dd_filename
+        else:
+            filename = self.browse_button_loadFile()
+        
         #Discontinue if the user canceled selection of a file
         if len(filename) < 1:
             return
@@ -1261,7 +1266,10 @@ class guiActions(object):
         self.context.ugServVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:#0055ff;\">%s</span></p></body></html>" % (latest_version), None))
         self.context.ugCliVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:%s;\">%s (%s)</span></p></body></html>" % (text_color, self.context.SettingsManager.CURRENT_GUI_VERSION, comment), None))
         
-
+    
+    def fileDropAction(self, filename):
+        self.loadUiState(dd_filename=filename)
+    
     def quitApp(self):
         #Basically the same as new, except we then quit after that
         if self.newSettingsFile():
