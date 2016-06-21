@@ -1100,7 +1100,7 @@ class guiActions(object):
     
     def browse_button_loadFile(self):
         start_dir = [self.context.SettingsManager.currentFile, 0]
-        caption = "Location of scc.ini..."
+        caption = "Location of scc2.ini..."
         filters = "SCCwatcher Settings File (*.ini);;All Files (*.*)"
         filename = self.browse_button_master(None, QtGui.QFileDialog.AcceptOpen, QtGui.QFileDialog.ExistingFile, caption, alt_mode=True, start_dir=start_dir, filters=filters)
         return filename
