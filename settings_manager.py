@@ -3,7 +3,7 @@ from collections import OrderedDict as OD
 from copy import deepcopy as DC
 
 #Tracking the current version from here only, making the change here updates everything.
-_CURRENT_GUI_VERSION_ = "2.0"
+_CURRENT_GUI_VERSION_ = "2.1a1"
 #GitHub API url for version infos
 _GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/SCCwatcher-GUI/releases/latest"
 
@@ -216,6 +216,7 @@ scriptStatusDefaults["logging"] = "N/A"
 scriptStatusDefaults["verbose"] = "N/A"
 scriptStatusDefaults["recent_list_size"] = "N/A"
 scriptStatusDefaults["wl_al_size"] = "N/A"
+scriptStatusDefaults["ini_path"] = ""
 
 #These are for tracking GUI changes
 guiState = {}

@@ -41,6 +41,7 @@ class guiActions(object):
         #this is different from self.context.SettingsManager.isLoaded.
         #This just flags during the load operation itself and gives no indication as to whether or not something is currently loaded.
         self.__is_loading = False
+        self.script_status_vars = self.context.SettingsManager.scriptStatusDefaults
 
     
     def setLabelAndColor(self, element, status):
@@ -54,10 +55,16 @@ class guiActions(object):
         #Now set the element with its data
         element.setText(stylesheet)
     
+    
+    def setScriptStatus(self):
+        #going to send commands back the same way we received them, I really wish Hexchat played nice with threads+sockets :<
+        pass
+    
+    
     def getScriptStatus(self):
         #Simple function to get the current script status, if its available
         tmpname =  gettempdir() + OS_SEP + "sccw_temp.txt"
-        
+        script_connected = False
         try:
             tempfile = open(tmpname, 'r')
             pickleData = tempfile.read()
@@ -65,8 +72,14 @@ class guiActions(object):
             script_status = cPickle.loads(pickleData)
             if len(script_status) < 10:
                 script_status = self.context.SettingsManager.scriptStatusDefaults
+            else:
+                script_connected = True
         except:
             script_status = self.context.SettingsManager.scriptStatusDefaults
+            
+        #update global dict with new infos
+        self.script_status_vars = script_status
+        
         #Now we update the main page with our data
         self.setLabelAndColor(self.context.ssVersionState, script_status["version"])
         self.setLabelAndColor(self.context.ssStatusState, script_status["autodlstatus"])
@@ -80,6 +93,19 @@ class guiActions(object):
         self.setLabelAndColor(self.context.ssRecentState, script_status["recent_list_size"])
         self.setLabelAndColor(self.context.ssWatchAvoidState, script_status["wl_al_size"])
         
+        #And enable or disable our control group if we have a good connection
+        if script_connected is True:
+            self.context.scButtonFrame.setEnabled(True)
+            control_status_html = "<html><head/><body><p><span style=\" color:#00c800;\">Connected</span></p></body></html>"
+        else:
+            self.context.scButtonFrame.setEnabled(False)
+            control_status_html = "<html><head/><body><p><span style=\" color:#ff0000;\">Not Connected</span></p></body></html>"
+        self.context.sccsConStatusState.setText(_translate("sccw_SettingsUI", control_status_html, None))
+    
+    def loadActiveIni(self):
+        if len(self.script_status_vars["ini_path"]) > 1:
+            self.loadUiState(dd_filename=self.script_status_vars["ini_path"])
+    
     
     def checkRegexContent(self, pElement, pCheckbox):
         #This is a generic function for each box supporting regular expressions.
