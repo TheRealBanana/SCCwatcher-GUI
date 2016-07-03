@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # wanted to move all the ui functions into their own file to make everything look nicer
 # otherwise the settings_ui.py file was going to get really crowded.
+import re
+import cPickle
+import threading
+import socket
 from collections import OrderedDict as OD
 from numbers import Number
 #from collections import namedtuple as NT
@@ -11,10 +15,10 @@ from copy import deepcopy as DC
 from ntpath import basename as ntpath_basename
 from urllib import urlopen
 from ast import literal_eval as safe_eval
-import re
 from tempfile import gettempdir
 from os import sep as OS_SEP
-import cPickle
+from time import sleep, time
+
 
 try:
     _encoding = QtGui.QApplication.UnicodeUTF8
@@ -35,9 +39,191 @@ def regexValidator(expr):
         return False
 
 
+
+class Client(threading.Thread):
+    def __init__(self, guiActionsReference):
+        self.quitting = False
+        self.recv_tries = 0
+        self.connected = False
+        self.data_thread = None
+        self.waiting = False
+        self.last_send = int(time()) - 5
+        self.last_connect_try = int(time()) - 5
+        self.gref = guiActionsReference
+        #Set our connection status to False for now
+        self.gref.updateScriptStatusCallback("None", script_connected=False)
+        self.main_socket = None
+        super(Client, self).__init__()
+    
+    
+    def quit_thread(self):
+        self.quitting = True
+        try:
+            self.main_socket.send("CONNECTION_CLOSING;;;")
+        except:
+            pass
+        try:
+            self.main_socket.close()
+        except:
+            pass
+    
+    def get_connection(self):
+        while self.connected is False and self.quitting is False:
+            
+            if int(time()) - self.last_connect_try > 2: #Only try to connect every 2 seconds 
+                self.last_connect_try = int(time())
+                try:
+                    print "Trying to connect...."
+                    print "Getting port..."
+                    try:
+                        portnum = self.gref.get_current_port()
+                        if portnum is None:
+                            raise Exception("Error obtaining port num, client thread not started")
+                        self.address = ("127.0.0.1", portnum)
+                    except:
+                        continue
+                    self.main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.main_socket.settimeout(1)
+                    self.main_socket.connect(self.address)
+                    self.connected = True
+                    print "Connected!"
+                    continue
+                except:
+                    print "Failed to connect, sleeping 0.5s..."
+            
+            print "LOOP ITER"
+            sleep(0.5)
+            
+        if self.quitting is True:
+            self.connected = False
+    
+    
+    def get_script_status(self):
+        if self.connected is True and self.quitting is False:
+            try:
+                print "Sending status request..."
+                self.main_socket.send("GET_SCRIPT_STATUS;;;")
+                self.waiting = True
+            except Exception as e:
+                print "Caught exception in get_script_status(), error was: "
+                print e
+                if "timed out" not in str(e):
+                    print "Connection fail"
+                    self.main_socket.close()
+                    self.connected = False
+                    self.waiting = False
+                    return
+                return
+            print "sleeping A 5s"
+        
+    def pass_script_cmd(self, cmd):
+        if self.connected is True and self.quitting is False and len(cmd) > 0:
+            cmd = cmd + ";;;"
+            try:
+                self.main_socket.send(cmd)
+            except Exception as e:
+                print "Caught exception in pass_script_cmd(), error was: "
+                print e
+                if "timed out" not in str(e):
+                    print "Connection fail"
+                    self.main_socket.close()
+                    self.connected = False
+                    self.waiting = False
+                    return
+                
+    
+    def get_return_data(self):
+        if self.connected is True and self.quitting is False and self.recv_tries < 5:
+            try:
+                rawdata = self.main_socket.recv(8192)
+                try:
+                    rawdata = re.search(":::(.*?);;;", repr(rawdata), re.MULTILINE).group(1)
+                    rawdata = rawdata.replace("\\n", "\n")
+                    rawdata = rawdata.replace("\\\\", "\\")
+                except:
+                    print "Can't find our data, just keepalives"
+                    self.waiting = False
+                    self.recv_tries = 0
+                    return None
+                print repr(rawdata)
+                try:
+                    data = cPickle.loads(rawdata)
+                except:
+                    print "Pickle load fail"
+                    return None
+                print "----------------------------"
+                print "GOT DATA:"
+                print type(data)
+                print data
+                print "----------------------------"
+                #End our receive operation
+                self.waiting = False
+                self.recv_tries = 0
+                return data
+            except Exception as e:
+                print "Caught exception in get_return_data(), error was: "
+                print e
+                if "timed out" not in str(e):
+                    print "Connection fail"
+                    self.main_socket.close()
+                    self.connected = False
+                    self.waiting = False
+                    return
+            print "Adding to tries num"
+            self.recv_tries += 1
+            print self.recv_tries
+            return None
+        else:
+            self.waiting = False #Too many tries, we disconnected, or caught the quit signal.
+            self.recv_tries = 0
+            return None
+    
+    
+    def run(self):
+        while self.quitting is False:
+            sleep(0.2) #Limit how fast we run this loop
+            
+            #Check connection, try to get it back if we lost it
+            if self.connected is False:
+                #Update our status to disconnected:
+                self.gref.updateScriptStatusCallback("None", script_connected=False)
+                self.get_connection()
+                continue
+            
+            #Request data
+            if self.waiting is False:
+                if int(time()) - self.last_send > 5: #Only send request every 5 seconds
+                    #data = None
+                    #data = self.get_script_status()
+                    self.get_script_status()
+                    self.last_send = int(time())
+                continue
+            
+            #Waiting for data, lets get it
+            if self.waiting is True:
+                data = self.get_return_data()
+                if data is not None:
+                    if data == "CONNECTION_CLOSING":
+                        print "Got close request, quitting..."
+                        self.main_socket.close()
+                        self.connected = False
+                    self.gref.updateScriptStatusCallback(data, script_connected=True)
+                continue
+            
+            
+            print "sleeping C 1s"
+            sleep(1)
+        print "Quitting!"
+        try:
+            self.main_socket.close()
+        except:
+            pass
+        return
+
 class guiActions(object):
     def __init__(self, context):
         self.context = context
+        self.client_thread = None
         #this is different from self.context.SettingsManager.isLoaded.
         #This just flags during the load operation itself and gives no indication as to whether or not something is currently loaded.
         self.__is_loading = False
@@ -55,11 +241,66 @@ class guiActions(object):
         #Now set the element with its data
         element.setText(stylesheet)
     
+    def toggleScriptAutodl(self):
+        self.client_thread.pass_script_cmd("TOGGLE_AUTODL")
     
-    def setScriptStatus(self):
-        #going to send commands back the same way we received them, I really wish Hexchat played nice with threads+sockets :<
-        pass
+    def reloadScriptIniFile(self):
+        self.client_thread.pass_script_cmd("RELOAD_SCRIPT_SETTINGS")
     
+    def get_current_port(self):
+        tmpname =  gettempdir() + OS_SEP + "sccw_port.txt"
+        try:
+            tempfile = open(tmpname, 'r')
+            portNum = tempfile.read()
+            tempfile.close()
+            
+            if len(portNum) > 1:
+                return int(portNum)
+            else:
+                print "Zero size"
+                return None
+        except Exception as e:
+            print "Exception caught in get_current_port():"
+            print e
+            return None
+    
+    def updateScriptStatusCallback(self, script_status, script_connected=True):
+        #Our returned data from the script should be at least the size of our default status
+        if len(script_status) < len(self.context.SettingsManager.scriptStatusDefaults):
+            print "Len fail"
+            script_status = self.context.SettingsManager.scriptStatusDefaults
+        
+        print script_connected
+        self.script_status_vars = script_status
+        
+        #Now we update the main page with our data
+        self.setLabelAndColor(self.context.ssVersionState, script_status["version"])
+        self.setLabelAndColor(self.context.ssStatusState, script_status["autodlstatus"])
+        self.setLabelAndColor(self.context.ssSSLDownloadState, script_status["ssl"])
+        self.setLabelAndColor(self.context.ssMaxTriesState, script_status["max_dl_tries"])
+        self.setLabelAndColor(self.context.ssRetryDelayState, script_status["retry_wait"])
+        self.setLabelAndColor(self.context.ssCloudflareState, script_status["cf_workaround"])
+        self.setLabelAndColor(self.context.ssDupecheckingState, script_status["dupecheck"])
+        self.setLabelAndColor(self.context.ssLoggingState, script_status["logging"])
+        self.setLabelAndColor(self.context.ssVerboseState, script_status["verbose"])
+        self.setLabelAndColor(self.context.ssRecentState, script_status["recent_list_size"])
+        self.setLabelAndColor(self.context.ssWatchAvoidState, script_status["wl_al_size"])
+        
+        #And enable or disable our control group if we have a good connection
+        if script_connected is True:
+            self.context.scButtonFrame.setEnabled(True)
+            control_status_html = "<html><head/><body><p><span style=\" color:#00c800;\">Connected</span></p></body></html>"
+        else:
+            self.context.scButtonFrame.setEnabled(False)
+            control_status_html = "<html><head/><body><p><span style=\" color:#ff0000;\">Not Connected</span></p></body></html>"
+        self.context.sccsConStatusState.setText(_translate("sccw_SettingsUI", control_status_html, None))
+        print "FINAL"
+    
+    
+    def startClientThread(self):
+        print "Client thread starting...."
+        self.client_thread = Client(self)
+        self.client_thread.start()
     
     def getScriptStatus(self):
         #Simple function to get the current script status, if its available
@@ -101,6 +342,10 @@ class guiActions(object):
             self.context.scButtonFrame.setEnabled(False)
             control_status_html = "<html><head/><body><p><span style=\" color:#ff0000;\">Not Connected</span></p></body></html>"
         self.context.sccsConStatusState.setText(_translate("sccw_SettingsUI", control_status_html, None))
+    
+    
+    
+    
     
     def loadActiveIni(self):
         if len(self.script_status_vars["ini_path"]) > 1:
@@ -1301,6 +1546,12 @@ class guiActions(object):
         if self.newSettingsFile():
             #User wants to quit
             self.context.MainWindow._user_accept_close = True
+            #Shut down client thread
+            print "Exec'ing quit func in client thread"
+            self.client_thread.quit_thread()
+            print "Waiting on client thread join"
+            self.client_thread.join()
+            print "Client thread joined"
             self.context.MainWindow.close()
     
     

@@ -241,9 +241,9 @@ class Ui_sccw_SettingsUI(object):
         self.scbfReloadScriptSettingsButton = QtGui.QPushButton(self.scButtonFrame)
         self.scbfReloadScriptSettingsButton.setObjectName(_fromUtf8("scbfReloadScriptSettingsButton"))
         self.gridLayout.addWidget(self.scbfReloadScriptSettingsButton, 0, 0, 1, 1)
-        self.scbfDisableAutodlButton = QtGui.QPushButton(self.scButtonFrame)
-        self.scbfDisableAutodlButton.setObjectName(_fromUtf8("scbfDisableAutodlButton"))
-        self.gridLayout.addWidget(self.scbfDisableAutodlButton, 1, 0, 1, 1)
+        self.scbfToggleAutodlButton = QtGui.QPushButton(self.scButtonFrame)
+        self.scbfToggleAutodlButton.setObjectName(_fromUtf8("scbfToggleAutodlButton"))
+        self.gridLayout.addWidget(self.scbfToggleAutodlButton, 1, 0, 1, 1)
         self.scbfEditCurIniButton = QtGui.QPushButton(self.scButtonFrame)
         self.scbfEditCurIniButton.setObjectName(_fromUtf8("scbfEditCurIniButton"))
         self.gridLayout.addWidget(self.scbfEditCurIniButton, 2, 0, 1, 1)
@@ -936,8 +936,8 @@ class Ui_sccw_SettingsUI(object):
         QtCore.QObject.connect(self.WLSGsavepathBrowseButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.browse_button_WLsavepath)
         QtCore.QObject.connect(self.WLSGexternalCommandBrowseButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.browse_button_WLextProgram)
         QtCore.QObject.connect(self.ugCheckUpdateButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.checkForUpdates)
-        #QtCore.QObject.connect(self.ugCheckUpdateButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.checkForUpdates)
-        #QtCore.QObject.connect(self.ugCheckUpdateButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.checkForUpdates)
+        QtCore.QObject.connect(self.scbfReloadScriptSettingsButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.reloadScriptIniFile)
+        QtCore.QObject.connect(self.scbfToggleAutodlButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.toggleScriptAutodl)
         QtCore.QObject.connect(self.scbfEditCurIniButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.loadActiveIni)
         #Data update triggers
         ##Watchlist##
@@ -1090,11 +1090,14 @@ class Ui_sccw_SettingsUI(object):
         sccw_SettingsUI.setTabOrder(self.ugCheckUpdateButton, self.buttonBox)
         
         #Set up timer to constantly check script status. 5 seconds seems fine
-        self.timer = QtCore.QTimer()
-        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.guiActions.getScriptStatus)
-        self.timer.start(5000)
+        #self.timer = QtCore.QTimer()
+        #QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.guiActions.getScriptStatus)
+        #self.timer.start(5000)
         #Get first run out of the way
-        self.guiActions.getScriptStatus()
+        #self.guiActions.getScriptStatus()
+        
+        #Start client thread for GUI <-> script coms
+        self.guiActions.startClientThread()
         
     def retranslateUi(self, sccw_SettingsUI):
         sccw_SettingsUI.setWindowTitle(_translate("sccw_SettingsUI", "SCCwatcher - New Settings File", None))
@@ -1140,7 +1143,7 @@ class Ui_sccw_SettingsUI(object):
         self.ssVerboseLabel.setText(_translate("sccw_SettingsUI", "Verbose Output:", None))
         self.scriptControlGroup.setTitle(_translate("sccw_SettingsUI", "Script Control", None))
         self.scbfReloadScriptSettingsButton.setText(_translate("sccw_SettingsUI", "Reload Script Settings", None))
-        self.scbfDisableAutodlButton.setText(_translate("sccw_SettingsUI", "Disable Auto Downloading", None))
+        self.scbfToggleAutodlButton.setText(_translate("sccw_SettingsUI", "Toggle Auto Downloading", None))
         self.scbfEditCurIniButton.setText(_translate("sccw_SettingsUI", "Edit Current scc2.ini", None))
         self.sccsConStatusLabel.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-size:12pt;\">Script Connection: </span></p></body></html>", None))
         self.sccsConStatusState.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" color:#ff0000;\">_SCRIPT_CONNECTION_STATUS_</span></p></body></html>", None))

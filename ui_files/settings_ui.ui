@@ -748,9 +748,9 @@ aids in diagnosing any issues with the script.</string>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QPushButton" name="scbfDisableAutodlButton">
+         <widget class="QPushButton" name="scbfToggleAutodlButton">
           <property name="text">
-           <string>Disable Auto Downloading</string>
+           <string>Toggle Auto Downloading</string>
           </property>
          </widget>
         </item>
