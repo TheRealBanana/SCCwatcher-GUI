@@ -11,6 +11,7 @@ from numbers import Number
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 from PyQt4.QtCore import QDir
+from PyQt4.QtCore import SIGNAL
 from copy import deepcopy as DC
 from ntpath import basename as ntpath_basename
 from urllib import urlopen
@@ -47,12 +48,16 @@ class Client(threading.Thread):
         self.connected = False
         self.data_thread = None
         self.waiting = False
-        self.last_send = int(time()) - 5
-        self.last_connect_try = int(time()) - 5
+        self.SEND_WAIT = 1
+        self.last_send = int(time()) - self.SEND_WAIT
+        self.CONNECT_WAIT = 5
+        self.last_connect_try = int(time()) - self.CONNECT_WAIT
         self.gref = guiActionsReference
+        self.MW = self.gref.context.MainWindow
         #Set our connection status to False for now
-        self.gref.updateScriptStatusCallback("None", script_connected=False)
+        self.MW.emit(SIGNAL("gotScriptStatusUpdate"), "None", False)
         self.main_socket = None
+        self.DATA_WAIT_TIMEOUT = 1
         super(Client, self).__init__()
     
     
@@ -70,7 +75,7 @@ class Client(threading.Thread):
     def get_connection(self):
         while self.connected is False and self.quitting is False:
             
-            if int(time()) - self.last_connect_try > 2: #Only try to connect every 2 seconds 
+            if int(time()) - self.last_connect_try > self.CONNECT_WAIT:
                 self.last_connect_try = int(time())
                 try:
                     try:
@@ -81,7 +86,7 @@ class Client(threading.Thread):
                     except:
                         continue
                     self.main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    self.main_socket.settimeout(1)
+                    self.main_socket.settimeout(self.DATA_WAIT_TIMEOUT)
                     self.main_socket.connect(self.address)
                     self.connected = True
                     continue
@@ -111,6 +116,8 @@ class Client(threading.Thread):
             cmd = cmd + ";;;"
             try:
                 self.main_socket.send(cmd)
+                #Wait for receive confirm
+                self.waiting = True
             except Exception as e:
                 if "timed out" not in str(e):
                     self.main_socket.close()
@@ -160,13 +167,13 @@ class Client(threading.Thread):
             #Check connection, try to get it back if we lost it
             if self.connected is False:
                 #Update our status to disconnected:
-                self.gref.updateScriptStatusCallback("None", script_connected=False)
+                self.MW.emit(SIGNAL("gotScriptStatusUpdate"), "DISCON", False)
                 self.get_connection()
                 continue
             
             #Request data
             if self.waiting is False:
-                if int(time()) - self.last_send > 5: #Only send request every 5 seconds
+                if int(time()) - self.last_send > self.SEND_WAIT: 
                     #data = None
                     #data = self.get_script_status()
                     self.get_script_status()
@@ -180,7 +187,9 @@ class Client(threading.Thread):
                     if data == "CONNECTION_CLOSING":
                         self.main_socket.close()
                         self.connected = False
-                    self.gref.updateScriptStatusCallback(data, script_connected=True)
+                    if isinstance(data, basestring) is True:
+                        continue
+                    self.MW.emit(SIGNAL("gotScriptStatusUpdate"), data, True)
                 continue
             
             sleep(1)
@@ -234,7 +243,7 @@ class guiActions(object):
     
     def updateScriptStatusCallback(self, script_status, script_connected=True):
         #Our returned data from the script should be at least the size of our default status
-        if len(script_status) < len(self.context.SettingsManager.scriptStatusDefaults):
+        if isinstance(script_status, dict) is False or len(script_status) < len(self.context.SettingsManager.scriptStatusDefaults):
             script_status = self.context.SettingsManager.scriptStatusDefaults
         
         self.script_status_vars = script_status
@@ -259,7 +268,8 @@ class guiActions(object):
         else:
             self.context.scButtonFrame.setEnabled(False)
             control_status_html = "<html><head/><body><p><span style=\" color:#ff0000;\">Not Connected</span></p></body></html>"
-        self.context.sccsConStatusState.setText(_translate("sccw_SettingsUI", control_status_html, None))  
+            
+        self.context.sccsConStatusState.setText(_translate("sccw_SettingsUI", control_status_html, None))
     
     def startClientThread(self):
         self.client_thread = Client(self)

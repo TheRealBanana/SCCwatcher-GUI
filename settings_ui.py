@@ -907,6 +907,8 @@ class Ui_sccw_SettingsUI(object):
         ## Slot connectors ##
         #File drag-and-drop support
         QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("gotFileDrop"), self.guiActions.fileDropAction)
+        #Script status update signal
+        QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("gotScriptStatusUpdate"), self.guiActions.updateScriptStatusCallback)
         #Closing signal
         #So apparently we can use the signal QApplication::aboutToQuit(void)
         QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("appClosing"), self.guiActions.quitApp)
