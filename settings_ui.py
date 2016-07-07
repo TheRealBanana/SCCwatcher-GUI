@@ -777,7 +777,7 @@ class Ui_sccw_SettingsUI(object):
         self.agAboutTextbox = QtGui.QTextEdit(self.aboutGroup)
         self.agAboutTextbox.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.agAboutTextbox.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.agAboutTextbox.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.agAboutTextbox.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.agAboutTextbox.setObjectName(_fromUtf8("agAboutTextbox"))
         self.aboutBoxGridLayout.addWidget(self.agAboutTextbox, 0, 0, 1, 1)
         self.aboutTabUpdateGroup = QtGui.QGroupBox(self.aboutTab)

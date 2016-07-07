@@ -1,6 +1,8 @@
 *.pyc
+sccwatcher.py
 *.ini
 beta_builds/build*
 beta_builds/upx*
 beta_builds/*.py
 beta_builds/*.pyw
+beta_builds/dist*
