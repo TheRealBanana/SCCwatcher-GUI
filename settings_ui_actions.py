@@ -202,7 +202,6 @@ class guiActions(object):
                 if cur_item == 0: #Could this cause sccwatcher to think a file has no changes when it does, or vice versa, because an item was skipped?
                     continue
                 cur_item_title = str(cur_item.text())
-                cur_item_title = cur_item_title.replace(" ", "_")
                 #Do a check to see if the title is in our saved data.
                 #If not, we know something has changed and we can quit right now
                 if cur_item_title not in check_dict.keys():
@@ -288,7 +287,6 @@ class guiActions(object):
             if cur_WL_item == 0:
                 continue
             cur_WL_title = str(cur_WL_item.text())
-            cur_WL_title = cur_WL_title.replace(" ", "_")
             cur_WL_data = cur_WL_item.data(Qt.UserRole).toPyObject()
             #Save it
             wlOptions[cur_WL_title] = cur_WL_data
@@ -299,7 +297,6 @@ class guiActions(object):
             if cur_AL_item == 0:
                 continue
             cur_AL_title = str(cur_AL_item.text())
-            cur_AL_title = cur_AL_title.replace(" ", "_")
             cur_AL_data = cur_AL_item.data(Qt.UserRole).toPyObject()
             #Save it
             alOptions[cur_AL_title] = cur_AL_data
@@ -747,8 +744,6 @@ class guiActions(object):
         for item_name, item_data in converted_data["watch"].iteritems():
             __sortingEnabled = self.context.WLGwatchlistItemsList.isSortingEnabled()
             self.context.WLGwatchlistItemsList.setSortingEnabled(False)
-            #Replace any underscores with spaces in the title
-            item_name = item_name.replace("_", " ")
             #Create a new QListWidgetItem with the name item_name
             new_item = QtGui.QListWidgetItem()
             #Make sure the item_name isnt a duplicate
@@ -778,8 +773,6 @@ class guiActions(object):
             new_item = QtGui.QListWidgetItem()
             #Remove the minus sign from the beginning of the watch title
             if item_name[0] == "-": item_name = self.removeMinusSignPrefix(item_name)
-            #Replace any underscores with spaces in the title
-            item_name = item_name.replace("_", " ")
             #Make sure the title isnt a dupe
             item_name = self.checkForDuplicates(self.context.avoidlistItemsList, item_name)
             #Set its text
@@ -881,9 +874,6 @@ class guiActions(object):
             
             #Get the watch title
             cur_WL_title = str(cur_WL_item.text())
-            #Spaces get encoded as %20 with Qt and there doesn't seem to be any way to change that besides writing my own saving system
-            #Much easier to just change them to underscores for now. We can even change them back to spaces later if necessary
-            cur_WL_title = cur_WL_title.replace(" ", "_")
             
             #Return our data and use toPyObject() to turn it from a QVariant to an OrderedDict.
             cur_WL_data = cur_WL_item.data(Qt.UserRole).toPyObject()
@@ -904,7 +894,6 @@ class guiActions(object):
             
             #Set the title, a minus denotes it is an avoidlist item. REMEMBER TO REMOVE ON LOAD!
             cur_AL_title = str(cur_AL_item.text())
-            cur_AL_title = cur_AL_title.replace(" ", "_")
             cur_AL_title = "-" + cur_AL_title
             
             #Get the data
