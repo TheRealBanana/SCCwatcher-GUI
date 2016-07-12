@@ -1,9 +1,9 @@
-from PyQt4 import QtCore
+import re
 from collections import OrderedDict as OD
 from copy import deepcopy as DC
 
 #Tracking the current version from here only, making the change here updates everything.
-_CURRENT_GUI_VERSION_ = "2.1a3"
+_CURRENT_GUI_VERSION_ = "2.1a4"
 #GitHub API url for version infos
 _GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/SCCwatcher-GUI/releases/latest"
 
@@ -226,7 +226,6 @@ guiState["avoidlistState"] = OD()
 
 class sccwSettingsManager:
     def __init__(self, MWloc):
-        self.appSettings = None
         self.elementsToOptions = elementsToOptions
         self.elementAccessMethods = elementAccessMethods
         self.watchListElements = watchListElements
@@ -245,18 +244,8 @@ class sccwSettingsManager:
         #Current version tracking
         self.CURRENT_GUI_VERSION = _CURRENT_GUI_VERSION_
         self.GITHUB_VER_URL = _GITHUB_VERSION_URL_
-        
-    def resetSettings(self):
-        self.appSettings.clear()   
-        
-    def syncData(self):
-        #Commit all settings to file
-        #Only reason I made this its own function was in anticipation of a need to do other stuff on sync.
-        self.appSettings.sync()
     
     def openSettingsFile(self, filename):
-        self.appSettings = QtCore.QSettings(filename, QtCore.QSettings.IniFormat)
-        self.appSettings.setIniCodec("UTF-8")
         self.currentFile = filename
         self.isLoaded = True
         
@@ -266,49 +255,49 @@ class sccwSettingsManager:
         self.isLoaded = False
     
     def saveSettings(self, data):
-        #Clear out the data currently in our QSetting object to make sure no old stale data is saved
-        self.resetSettings()
+        savefile = open(self.currentFile, 'w')
+        for key in data:
+            savefile.write("[%s]" % str(key))
+            savefile.write("\n")
+            for key, value in data[key].iteritems():
+                line = "%s=%s" % (key, value)
+                savefile.write(line)
+                savefile.write("\n")
+            savefile.write("\n")
         
-        #data{} is similar in structure to loadSettings()'s data
-        #Each key is the subgroup name, below that is another dictionary containing a list of keys and values for that group.
-        #You can feed back the data from loadSettings to saveSettings to give you an idea of the structure.
-        #The actual subgroups are the tabs of the GUI.
-        for group in data:
-            #Each key is our group name
-            if data[group] is None:
-                continue
-            self.appSettings.beginGroup(group)
-            for key, value in data[group].iteritems():
-                #Save eack value to respective key
-                self.appSettings.setValue(key, value)
-            #close the group and move on to the next one
-            self.appSettings.endGroup()
+        savefile.close()
         
-        #Sync data. It works without this because sync() is automatically called on the destruction of the QSettings object, which happens at close.
-        #Id rather do it now though.
-        self.syncData() 
-
     def loadSettings(self):
         returnData = OD()
-        #We have no idea what subgroups we need to load so we have to get the list
-        #We'll loop through each subgroup and get the data for each.
+        cur_dict = None
         
-        for subgroup in self.appSettings.childGroups():
-            subgroup = str(subgroup)
-            returnData[subgroup] = OD()
-            self.appSettings.beginGroup(subgroup)
-            #loop through the keys in this subgroup and save their values
-            for value in self.appSettings.childKeys():
-                value = str(value)
-                #Need to handle QStringLists differently
-                item = self.appSettings.value(value).toPyObject()
-                if type(item) is QtCore.QStringList:
-                    returnData[subgroup][value] = []
-                    for x in xrange(len(item)):  #Why xrange and not iterate over the QStringList itself ('for x in item')?
-                        returnData[subgroup][value].append(str(item[x]))
+        try:
+            inifile = open(self.currentFile, 'r')
+        except:
+            raise Exception("Error opening file at %s" % self.currentFile)
+        
+        #Here's the business end of the function
+        for line in inifile:
+            #Ignore any commented out lines
+            if line[0] == "#":
+                continue
+            
+            #New group
+            if line[0] == "[":
+                grpname = re.match("\[(.*?)\]", line).group(1)
+                cur_dict = grpname
+                if returnData.has_key("grpname") is False:
+                    returnData[grpname] = OD()
+                
+            #Options
+            elif re.match("(.*?)(?:\s+)?=(?:\s+)?(.*)", line) is not None:
+                if cur_dict is not None:
+                    option_line = re.match("(.*?)(?:\s+)?=(?:\s+)?(.*)", line)
+                    returnData[cur_dict][str(option_line.group(1)).lower()] = str(option_line.group(2))
                 else:
-                    returnData[subgroup][value] = str(item)
-            self.appSettings.endGroup()
+                    pass
         
-        #We should have a nice dictionary with all the requested data in it so just return
+        #Gotta close it before we quit
+        inifile.close()
+
         return returnData
