@@ -382,6 +382,8 @@ class guiActions(object):
         self.context.SettingsManager.guiState["avoidlistState"] = OD()
         #Close the current file completely
         self.context.SettingsManager.closeSettingsFile()
+        #Clear redo/undo stacks
+        self.context.undoRedoSystem.reset()
         
         #Now set the title
         self.updateUiTitle("New Settings File")
@@ -1457,6 +1459,54 @@ class guiActions(object):
     def fileDropAction(self, filename):
         self.loadUiState(dd_filename=filename)
     
+    #Custom edit menu stuffs
+    def updateEditMenuStatus(self):
+        currentWidget = self.context.MainWindow.window().focusWidget()
+        
+        #Update selection options if necessary
+        if currentWidget is not None:
+            if "special_QLineEdit" in str(currentWidget):
+                self.context.actionSelectAll.setEnabled(True)
+                #Check for selection
+                self.context.actionCut.setEnabled(currentWidget.hasSelectedText())
+                self.context.actionCopy.setEnabled(currentWidget.hasSelectedText())
+                self.context.actionDelete.setEnabled(currentWidget.hasSelectedText())
+                #Check for clipboard
+                if len(QtGui.QApplication.clipboard().text()) > 0:
+                    self.context.actionPaste.setEnabled(True)
+                else:
+                    self.context.actionPaste.setEnabled(False)
+                
+    def customContextMenu_Cut(self):
+        currentWidget = self.context.MainWindow.window().focusWidget()
+        if "special_QLineEdit" in str(currentWidget):
+            if currentWidget.hasSelectedText() is True:
+                currentWidget.cut()
+    
+    def customContextMenu_Copy(self):
+        currentWidget = self.context.MainWindow.window().focusWidget()
+        if "special_QLineEdit" in str(currentWidget):
+            if currentWidget.hasSelectedText() is True:
+                currentWidget.copy()
+            pass
+    
+    def customContextMenu_Paste(self):
+        currentWidget = self.context.MainWindow.window().focusWidget()
+        if "special_QLineEdit" in str(currentWidget):
+            if len(QtGui.QApplication.clipboard().text()) > 0:
+                currentWidget.paste()
+    
+    def customContextMenu_Delete(self):
+        currentWidget = self.context.MainWindow.window().focusWidget()
+        if "special_QLineEdit" in str(currentWidget):
+            if currentWidget.hasSelectedText() is True:
+                currentWidget.del_()
+    
+    def customContextMenu_SelectAll(self):
+        currentWidget = self.context.MainWindow.window().focusWidget()
+        if "special_QLineEdit" in str(currentWidget):
+            currentWidget.selectAll()
+    
     def quitApp(self):
         #Basically the same as new, except we then quit after that
         if self.newSettingsFile():
@@ -1466,10 +1516,3 @@ class guiActions(object):
             self.client_thread.quit_thread()
             self.client_thread.join()
             self.context.MainWindow.close()
-    
-    
-    
-    
-    #Undo/Redo system.
-    #Temporarily removed to restore my sanity
-    

@@ -1,3 +1,4 @@
+#!/bin/env python2.7
 ## SCCwatcher 2.0         ##
 ##                        ##
 ## sccwatcher.py          ##
@@ -16,6 +17,7 @@ class SCCMainWindow(QtGui.QMainWindow):
         super(SCCMainWindow, self).__init__(parent)
         self._user_accept_close = False
         self.setAcceptDrops(True)
+        self.ui = None
 
     def closeEvent(self, event):
         #We first emit the closing signal, then we actually close
@@ -45,6 +47,7 @@ def main():
     Window = SCCMainWindow()
     #Window.setAcceptDrops(True)
     ui = Ui_sccw_SettingsUI()
+    Window.ui = ui
     ui.setupUi(Window)
     Window.show()
     sys.exit(app.exec_())

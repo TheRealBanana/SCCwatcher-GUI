@@ -8,9 +8,10 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
-from settings_manager import sccwSettingsManager as sccwSettingsManager
-from settings_ui_actions import guiActions as guiActions
+from settings_manager import sccwSettingsManager
+from settings_ui_actions import guiActions
 from functools import partial
+from undoredo_system import undoRedoSystem, special_QLineEdit
 import icon_resources_rc
 
 
@@ -27,9 +28,12 @@ try:
 except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
+    
+
 
 class Ui_sccw_SettingsUI(object):
     def setupUi(self, sccw_SettingsUI):
+        self.MainWindow = sccw_SettingsUI
         #Instantiate our settings object, passing windows position and size to set the window to its last known position
         self.SettingsManager = sccwSettingsManager([sccw_SettingsUI.pos, sccw_SettingsUI.size])
         self.elementsToOptions = self.SettingsManager.elementsToOptions
@@ -38,7 +42,8 @@ class Ui_sccw_SettingsUI(object):
         self.avoidListElements = self.SettingsManager.avoidListElements
         #Set up our actions class with the proper context info
         self.guiActions = guiActions(self)
-        self.MainWindow = sccw_SettingsUI
+        #And our undo-redo class
+        self.undoRedoSystem = undoRedoSystem(self)
         
         #Setting up the main window
         sccw_SettingsUI.setObjectName(_fromUtf8("sccw_SettingsUI"))
@@ -102,7 +107,7 @@ class Ui_sccw_SettingsUI(object):
         self.ggPasskeyLabel = QtGui.QLabel(self.generalGroup)
         self.ggPasskeyLabel.setGeometry(QtCore.QRect(15, 30, 51, 16))
         self.ggPasskeyLabel.setObjectName(_fromUtf8("ggPasskeyLabel"))
-        self.ggPasskeyTextbox = QtGui.QLineEdit(self.generalGroup)
+        self.ggPasskeyTextbox = special_QLineEdit(self.generalGroup)
         self.ggPasskeyTextbox.setGeometry(QtCore.QRect(70, 27, 256, 20))
         self.ggPasskeyTextbox.setEchoMode(QtGui.QLineEdit.PasswordEchoOnEdit)
         self.ggPasskeyTextbox.setObjectName(_fromUtf8("ggPasskeyTextbox"))
@@ -112,10 +117,10 @@ class Ui_sccw_SettingsUI(object):
         self.ggLogpathLabel = QtGui.QLabel(self.generalGroup)
         self.ggLogpathLabel.setGeometry(QtCore.QRect(15, 90, 46, 13))
         self.ggLogpathLabel.setObjectName(_fromUtf8("ggLogpathLabel"))
-        self.ggSavepathTextbox = QtGui.QLineEdit(self.generalGroup)
+        self.ggSavepathTextbox = special_QLineEdit(self.generalGroup)
         self.ggSavepathTextbox.setGeometry(QtCore.QRect(70, 57, 256, 20))
         self.ggSavepathTextbox.setObjectName(_fromUtf8("ggSavepathTextbox"))
-        self.ggLogpathTextbox = QtGui.QLineEdit(self.generalGroup)
+        self.ggLogpathTextbox = special_QLineEdit(self.generalGroup)
         self.ggLogpathTextbox.setGeometry(QtCore.QRect(70, 87, 256, 20))
         self.ggLogpathTextbox.setObjectName(_fromUtf8("ggLogpathTextbox"))
         self.ggSavepathBrowseButton = QtGui.QPushButton(self.generalGroup)
@@ -136,7 +141,7 @@ class Ui_sccw_SettingsUI(object):
         self.ggVerboseTabLabel = QtGui.QLabel(self.generalGroup)
         self.ggVerboseTabLabel.setGeometry(QtCore.QRect(190, 186, 101, 16))
         self.ggVerboseTabLabel.setObjectName(_fromUtf8("ggVerboseTabLabel"))
-        self.ggVerboseTabTextbox = QtGui.QLineEdit(self.generalGroup)
+        self.ggVerboseTabTextbox = special_QLineEdit(self.generalGroup)
         self.ggVerboseTabTextbox.setGeometry(QtCore.QRect(295, 185, 96, 20))
         self.ggVerboseTabTextbox.setObjectName(_fromUtf8("ggVerboseTabTextbox"))
         self.ggEnableDebugCheck = QtGui.QCheckBox(self.generalGroup)
@@ -287,7 +292,7 @@ class Ui_sccw_SettingsUI(object):
         self.globalSizeLimitLowerSuffixSelector.addItem(_fromUtf8(""))
         self.globalSizeLimitLowerSuffixSelector.addItem(_fromUtf8(""))
         self.globalSizeLimitLowerSuffixSelector.addItem(_fromUtf8(""))
-        self.globalSizeLimitUpperTextbox = QtGui.QLineEdit(self.generalDownloadSettingsGroup)
+        self.globalSizeLimitUpperTextbox = special_QLineEdit(self.generalDownloadSettingsGroup)
         self.globalSizeLimitUpperTextbox.setGeometry(QtCore.QRect(104, 89, 41, 20))
         self.globalSizeLimitUpperTextbox.setObjectName(_fromUtf8("globalSizeLimitUpperTextbox"))
         self.globalSizeLimitUpperLabel = QtGui.QLabel(self.generalDownloadSettingsGroup)
@@ -301,7 +306,7 @@ class Ui_sccw_SettingsUI(object):
         self.globalSizeLimitUpperSuffixSelector.addItem(_fromUtf8(""))
         self.globalSizeLimitUpperSuffixSelector.addItem(_fromUtf8(""))
         self.globalSizeLimitUpperSuffixSelector.addItem(_fromUtf8(""))
-        self.globalSizeLimitLowerTextbox = QtGui.QLineEdit(self.generalDownloadSettingsGroup)
+        self.globalSizeLimitLowerTextbox = special_QLineEdit(self.generalDownloadSettingsGroup)
         self.globalSizeLimitLowerTextbox.setGeometry(QtCore.QRect(104, 59, 41, 20))
         self.globalSizeLimitLowerTextbox.setObjectName(_fromUtf8("globalSizeLimitLowerTextbox"))
         self.globalSizeLimitLowerLabel = QtGui.QLabel(self.generalDownloadSettingsGroup)
@@ -321,13 +326,13 @@ class Ui_sccw_SettingsUI(object):
         self.globalCFBypassCookiefileBrowseButton = QtGui.QPushButton(self.generalDownloadSettingsGroup)
         self.globalCFBypassCookiefileBrowseButton.setGeometry(QtCore.QRect(285, 160, 51, 23))
         self.globalCFBypassCookiefileBrowseButton.setObjectName(_fromUtf8("globalCFBypassCookiefileBrowseButton"))
-        self.globalCFBypassCookiefilePathTextbox = QtGui.QLineEdit(self.generalDownloadSettingsGroup)
+        self.globalCFBypassCookiefilePathTextbox = special_QLineEdit(self.generalDownloadSettingsGroup)
         self.globalCFBypassCookiefilePathTextbox.setGeometry(QtCore.QRect(72, 162, 196, 20))
         self.globalCFBypassCookiefilePathTextbox.setObjectName(_fromUtf8("globalCFBypassCookiefilePathTextbox"))
         self.globalCFBypassUseragentLabel = QtGui.QLabel(self.generalDownloadSettingsGroup)
         self.globalCFBypassUseragentLabel.setGeometry(QtCore.QRect(10, 200, 91, 16))
         self.globalCFBypassUseragentLabel.setObjectName(_fromUtf8("globalCFBypassUseragentLabel"))
-        self.globalCFBypassUseragentTextbox = QtGui.QLineEdit(self.generalDownloadSettingsGroup)
+        self.globalCFBypassUseragentTextbox = special_QLineEdit(self.generalDownloadSettingsGroup)
         self.globalCFBypassUseragentTextbox.setGeometry(QtCore.QRect(100, 197, 166, 20))
         self.globalCFBypassUseragentTextbox.setObjectName(_fromUtf8("globalCFBypassUseragentTextbox"))
         self.globalRetryWaitLabel = QtGui.QLabel(self.generalDownloadSettingsGroup)
@@ -358,7 +363,7 @@ class Ui_sccw_SettingsUI(object):
         self.utwuiHostnameLabel = QtGui.QLabel(self.utWebUiUploadGroup)
         self.utwuiHostnameLabel.setGeometry(QtCore.QRect(15, 65, 71, 16))
         self.utwuiHostnameLabel.setObjectName(_fromUtf8("utwuiHostnameLabel"))
-        self.utwuiPortTextbox = QtGui.QLineEdit(self.utWebUiUploadGroup)
+        self.utwuiPortTextbox = special_QLineEdit(self.utWebUiUploadGroup)
         self.utwuiPortTextbox.setGeometry(QtCore.QRect(300, 62, 41, 20))
         self.utwuiPortTextbox.setInputMethodHints(QtCore.Qt.ImhDigitsOnly)
         self.utwuiPortTextbox.setMaxLength(5)
@@ -366,14 +371,14 @@ class Ui_sccw_SettingsUI(object):
         self.utwuiPasswordLabel = QtGui.QLabel(self.utWebUiUploadGroup)
         self.utwuiPasswordLabel.setGeometry(QtCore.QRect(15, 135, 61, 16))
         self.utwuiPasswordLabel.setObjectName(_fromUtf8("utwuiPasswordLabel"))
-        self.utwuiPasswordTextbox = QtGui.QLineEdit(self.utWebUiUploadGroup)
+        self.utwuiPasswordTextbox = special_QLineEdit(self.utWebUiUploadGroup)
         self.utwuiPasswordTextbox.setGeometry(QtCore.QRect(95, 132, 166, 20))
         self.utwuiPasswordTextbox.setEchoMode(QtGui.QLineEdit.Password)
         self.utwuiPasswordTextbox.setObjectName(_fromUtf8("utwuiPasswordTextbox"))
-        self.utwuiUsernameTextbox = QtGui.QLineEdit(self.utWebUiUploadGroup)
+        self.utwuiUsernameTextbox = special_QLineEdit(self.utWebUiUploadGroup)
         self.utwuiUsernameTextbox.setGeometry(QtCore.QRect(95, 97, 166, 20))
         self.utwuiUsernameTextbox.setObjectName(_fromUtf8("utwuiUsernameTextbox"))
-        self.utwuiHostnameTextbox = QtGui.QLineEdit(self.utWebUiUploadGroup)
+        self.utwuiHostnameTextbox = special_QLineEdit(self.utWebUiUploadGroup)
         self.utwuiHostnameTextbox.setGeometry(QtCore.QRect(95, 62, 166, 20))
         self.utwuiHostnameTextbox.setObjectName(_fromUtf8("utwuiHostnameTextbox"))
         self.utwuiUsernameLabel = QtGui.QLabel(self.utWebUiUploadGroup)
@@ -385,17 +390,17 @@ class Ui_sccw_SettingsUI(object):
         self.ftpMasterEnableCheck = QtGui.QCheckBox(self.ftpUploadGroup)
         self.ftpMasterEnableCheck.setGeometry(QtCore.QRect(15, 20, 141, 17))
         self.ftpMasterEnableCheck.setObjectName(_fromUtf8("ftpMasterEnableCheck"))
-        self.ftpHostnameTextbox = QtGui.QLineEdit(self.ftpUploadGroup)
+        self.ftpHostnameTextbox = special_QLineEdit(self.ftpUploadGroup)
         self.ftpHostnameTextbox.setGeometry(QtCore.QRect(100, 62, 166, 20))
         self.ftpHostnameTextbox.setObjectName(_fromUtf8("ftpHostnameTextbox"))
-        self.ftpUsernameTextbox = QtGui.QLineEdit(self.ftpUploadGroup)
+        self.ftpUsernameTextbox = special_QLineEdit(self.ftpUploadGroup)
         self.ftpUsernameTextbox.setGeometry(QtCore.QRect(100, 97, 166, 20))
         self.ftpUsernameTextbox.setObjectName(_fromUtf8("ftpUsernameTextbox"))
-        self.ftpPasswordTextbox = QtGui.QLineEdit(self.ftpUploadGroup)
+        self.ftpPasswordTextbox = special_QLineEdit(self.ftpUploadGroup)
         self.ftpPasswordTextbox.setGeometry(QtCore.QRect(100, 132, 166, 20))
         self.ftpPasswordTextbox.setEchoMode(QtGui.QLineEdit.Password)
         self.ftpPasswordTextbox.setObjectName(_fromUtf8("ftpPasswordTextbox"))
-        self.ftpPortTextbox = QtGui.QLineEdit(self.ftpUploadGroup)
+        self.ftpPortTextbox = special_QLineEdit(self.ftpUploadGroup)
         self.ftpPortTextbox.setGeometry(QtCore.QRect(305, 62, 41, 20))
         self.ftpPortTextbox.setInputMethodHints(QtCore.Qt.ImhDigitsOnly)
         self.ftpPortTextbox.setMaxLength(5)
@@ -415,7 +420,7 @@ class Ui_sccw_SettingsUI(object):
         self.ftpRemoteFolderLabel = QtGui.QLabel(self.ftpUploadGroup)
         self.ftpRemoteFolderLabel.setGeometry(QtCore.QRect(20, 170, 81, 16))
         self.ftpRemoteFolderLabel.setObjectName(_fromUtf8("ftpRemoteFolderLabel"))
-        self.ftpRemoteFolderTextbox = QtGui.QLineEdit(self.ftpUploadGroup)
+        self.ftpRemoteFolderTextbox = special_QLineEdit(self.ftpUploadGroup)
         self.ftpRemoteFolderTextbox.setGeometry(QtCore.QRect(100, 167, 166, 20))
         self.ftpRemoteFolderTextbox.setObjectName(_fromUtf8("ftpRemoteFolderTextbox"))
         self.ftpPasvModeCheck = QtGui.QCheckBox(self.ftpUploadGroup)
@@ -431,7 +436,7 @@ class Ui_sccw_SettingsUI(object):
         self.extCmdBrowseButton = QtGui.QPushButton(self.externalCommandGroup)
         self.extCmdBrowseButton.setGeometry(QtCore.QRect(285, 60, 51, 23))
         self.extCmdBrowseButton.setObjectName(_fromUtf8("extCmdBrowseButton"))
-        self.extCmdExeLocation = QtGui.QLineEdit(self.externalCommandGroup)
+        self.extCmdExeLocation = special_QLineEdit(self.externalCommandGroup)
         self.extCmdExeLocation.setGeometry(QtCore.QRect(95, 62, 181, 20))
         self.extCmdExeLocation.setObjectName(_fromUtf8("extCmdExeLocation"))
         self.extCmdMasterEnableCheck = QtGui.QCheckBox(self.externalCommandGroup)
@@ -443,7 +448,7 @@ class Ui_sccw_SettingsUI(object):
         self.extCmdArguemtsLabel = QtGui.QLabel(self.externalCommandGroup)
         self.extCmdArguemtsLabel.setGeometry(QtCore.QRect(10, 100, 66, 16))
         self.extCmdArguemtsLabel.setObjectName(_fromUtf8("extCmdArguemtsLabel"))
-        self.extCmdExeArguments = QtGui.QLineEdit(self.externalCommandGroup)
+        self.extCmdExeArguments = special_QLineEdit(self.externalCommandGroup)
         self.extCmdExeArguments.setGeometry(QtCore.QRect(95, 97, 181, 20))
         self.extCmdExeArguments.setObjectName(_fromUtf8("extCmdExeArguments"))
         self.tabWidget.addTab(self.downloadUploadTab, _fromUtf8(""))
@@ -508,7 +513,7 @@ class Ui_sccw_SettingsUI(object):
         self.watchlistSettingsGroup.setObjectName(_fromUtf8("watchlistSettingsGroup"))
         #Disabled on start
         self.watchlistSettingsGroup.setDisabled(True)
-        self.WLSGwatchNameTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGwatchNameTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGwatchNameTextbox.setGeometry(QtCore.QRect(90, 22, 291, 20))
         self.WLSGwatchNameTextbox.setObjectName(_fromUtf8("WLSGwatchNameTextbox"))
         self.WLSGwatchNameLabel = QtGui.QLabel(self.watchlistSettingsGroup)
@@ -517,7 +522,7 @@ class Ui_sccw_SettingsUI(object):
         self.WLSGwatchFilterLabel = QtGui.QLabel(self.watchlistSettingsGroup)
         self.WLSGwatchFilterLabel.setGeometry(QtCore.QRect(15, 60, 66, 16))
         self.WLSGwatchFilterLabel.setObjectName(_fromUtf8("WLSGwatchFilterLabel"))
-        self.WLSGwatchFilterTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGwatchFilterTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGwatchFilterTextbox.setGeometry(QtCore.QRect(90, 57, 291, 20))
         self.WLSGwatchFilterTextbox.setObjectName(_fromUtf8("WLSGwatchFilterTextbox"))
         self.WLSGwatchFilterRegexCheck = QtGui.QCheckBox(self.watchlistSettingsGroup)
@@ -526,7 +531,7 @@ class Ui_sccw_SettingsUI(object):
         self.WLSGavoidFilterListLabel = QtGui.QLabel(self.watchlistSettingsGroup)
         self.WLSGavoidFilterListLabel.setGeometry(QtCore.QRect(15, 95, 86, 16))
         self.WLSGavoidFilterListLabel.setObjectName(_fromUtf8("WLSGavoidFilterListLabel"))
-        self.WLSGavoidFilterListTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGavoidFilterListTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGavoidFilterListTextbox.setGeometry(QtCore.QRect(100, 92, 281, 20))
         self.WLSGavoidFilterListTextbox.setObjectName(_fromUtf8("WLSGavoidFilterListTextbox"))
         self.WLSGavoidFilterListRegexCheck = QtGui.QCheckBox(self.watchlistSettingsGroup)
@@ -535,13 +540,13 @@ class Ui_sccw_SettingsUI(object):
         self.WLSGwatchCatListLabel = QtGui.QLabel(self.watchlistSettingsGroup)
         self.WLSGwatchCatListLabel.setGeometry(QtCore.QRect(15, 130, 106, 16))
         self.WLSGwatchCatListLabel.setObjectName(_fromUtf8("WLSGwatchCatListLabel"))
-        self.WLSGwatchCatListTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGwatchCatListTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGwatchCatListTextbox.setGeometry(QtCore.QRect(125, 127, 311, 20))
         self.WLSGwatchCatListTextbox.setObjectName(_fromUtf8("WLSGwatchCatListTextbox"))
         self.WLSGsavepathLabel = QtGui.QLabel(self.watchlistSettingsGroup)
         self.WLSGsavepathLabel.setGeometry(QtCore.QRect(15, 165, 56, 16))
         self.WLSGsavepathLabel.setObjectName(_fromUtf8("WLSGsavepathLabel"))
-        self.WLSGsavepathTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGsavepathTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGsavepathTextbox.setGeometry(QtCore.QRect(70, 162, 301, 20))
         self.WLSGsavepathTextbox.setObjectName(_fromUtf8("WLSGsavepathTextbox"))
         self.WLSGsavepathBrowseButton = QtGui.QPushButton(self.watchlistSettingsGroup)
@@ -550,7 +555,7 @@ class Ui_sccw_SettingsUI(object):
         self.WLSGexternalCommandLabel = QtGui.QLabel(self.watchlistSettingsGroup)
         self.WLSGexternalCommandLabel.setGeometry(QtCore.QRect(15, 200, 101, 16))
         self.WLSGexternalCommandLabel.setObjectName(_fromUtf8("WLSGexternalCommandLabel"))
-        self.WLSGexternalCommandTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGexternalCommandTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGexternalCommandTextbox.setGeometry(QtCore.QRect(115, 197, 256, 20))
         self.WLSGexternalCommandTextbox.setObjectName(_fromUtf8("WLSGexternalCommandTextbox"))
         self.WLSGexternalCommandBrowseButton = QtGui.QPushButton(self.watchlistSettingsGroup)
@@ -559,7 +564,7 @@ class Ui_sccw_SettingsUI(object):
         self.WLSGexternalCommandArgsLabel = QtGui.QLabel(self.watchlistSettingsGroup)
         self.WLSGexternalCommandArgsLabel.setGeometry(QtCore.QRect(15, 235, 156, 16))
         self.WLSGexternalCommandArgsLabel.setObjectName(_fromUtf8("WLSGexternalCommandArgsLabel"))
-        self.WLSGexternalCommandArgsTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGexternalCommandArgsTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGexternalCommandArgsTextbox.setGeometry(QtCore.QRect(170, 232, 256, 20))
         self.WLSGexternalCommandArgsTextbox.setObjectName(_fromUtf8("WLSGexternalCommandArgsTextbox"))
         self.WLSGsizeLimitLowerLabel = QtGui.QLabel(self.watchlistSettingsGroup)
@@ -568,10 +573,10 @@ class Ui_sccw_SettingsUI(object):
         self.WLSGsizeLimitUpperLabel = QtGui.QLabel(self.watchlistSettingsGroup)
         self.WLSGsizeLimitUpperLabel.setGeometry(QtCore.QRect(15, 333, 86, 16))
         self.WLSGsizeLimitUpperLabel.setObjectName(_fromUtf8("WLSGsizeLimitUpperLabel"))
-        self.WLSGsizeLimitLowerTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGsizeLimitLowerTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGsizeLimitLowerTextbox.setGeometry(QtCore.QRect(105, 299, 41, 20))
         self.WLSGsizeLimitLowerTextbox.setObjectName(_fromUtf8("WLSGsizeLimitLowerTextbox"))
-        self.WLSGsizeLimitUpperTextbox = QtGui.QLineEdit(self.watchlistSettingsGroup)
+        self.WLSGsizeLimitUpperTextbox = special_QLineEdit(self.watchlistSettingsGroup)
         self.WLSGsizeLimitUpperTextbox.setGeometry(QtCore.QRect(105, 331, 41, 20))
         self.WLSGsizeLimitUpperTextbox.setObjectName(_fromUtf8("WLSGsizeLimitUpperTextbox"))
         self.WLSGsizeLimitLowerSuffixSelector = QtGui.QComboBox(self.watchlistSettingsGroup)
@@ -663,7 +668,7 @@ class Ui_sccw_SettingsUI(object):
         self.avoidlistSettingsGroup.setObjectName(_fromUtf8("avoidlistSettingsGroup"))
         #Disabled on start
         self.avoidlistSettingsGroup.setDisabled(True)
-        self.avoidNameTextbox = QtGui.QLineEdit(self.avoidlistSettingsGroup)
+        self.avoidNameTextbox = special_QLineEdit(self.avoidlistSettingsGroup)
         self.avoidNameTextbox.setGeometry(QtCore.QRect(90, 22, 291, 20))
         self.avoidNameTextbox.setObjectName(_fromUtf8("avoidNameTextbox"))
         self.avoidNameLabel = QtGui.QLabel(self.avoidlistSettingsGroup)
@@ -672,7 +677,7 @@ class Ui_sccw_SettingsUI(object):
         self.avoidFilterLabel = QtGui.QLabel(self.avoidlistSettingsGroup)
         self.avoidFilterLabel.setGeometry(QtCore.QRect(15, 60, 66, 16))
         self.avoidFilterLabel.setObjectName(_fromUtf8("avoidFilterLabel"))
-        self.avoidFilterTextbox = QtGui.QLineEdit(self.avoidlistSettingsGroup)
+        self.avoidFilterTextbox = special_QLineEdit(self.avoidlistSettingsGroup)
         self.avoidFilterTextbox.setGeometry(QtCore.QRect(90, 57, 291, 20))
         self.avoidFilterTextbox.setObjectName(_fromUtf8("avoidFilterTextbox"))
         self.avoidFilterRegexCheck = QtGui.QCheckBox(self.avoidlistSettingsGroup)
@@ -697,13 +702,13 @@ class Ui_sccw_SettingsUI(object):
         self.emailUseTLSCheck = QtGui.QCheckBox(self.generalEmailSettings)
         self.emailUseTLSCheck.setGeometry(QtCore.QRect(215, 100, 71, 17))
         self.emailUseTLSCheck.setObjectName(_fromUtf8("emailUseTLSCheck"))
-        self.hostnameIPTextbox = QtGui.QLineEdit(self.generalEmailSettings)
+        self.hostnameIPTextbox = special_QLineEdit(self.generalEmailSettings)
         self.hostnameIPTextbox.setGeometry(QtCore.QRect(80, 47, 131, 20))
         self.hostnameIPTextbox.setObjectName(_fromUtf8("hostnameIPTextbox"))
         self.portLabel = QtGui.QLabel(self.generalEmailSettings)
         self.portLabel.setGeometry(QtCore.QRect(220, 50, 26, 16))
         self.portLabel.setObjectName(_fromUtf8("portLabel"))
-        self.portTextbox = QtGui.QLineEdit(self.generalEmailSettings)
+        self.portTextbox = special_QLineEdit(self.generalEmailSettings)
         self.portTextbox.setGeometry(QtCore.QRect(250, 47, 36, 20))
         self.portTextbox.setInputMethodHints(QtCore.Qt.ImhNone)
         self.portTextbox.setInputMask(_fromUtf8(""))
@@ -715,10 +720,10 @@ class Ui_sccw_SettingsUI(object):
         self.passwordLabel = QtGui.QLabel(self.generalEmailSettings)
         self.passwordLabel.setGeometry(QtCore.QRect(10, 120, 61, 16))
         self.passwordLabel.setObjectName(_fromUtf8("passwordLabel"))
-        self.usernameTextbox = QtGui.QLineEdit(self.generalEmailSettings)
+        self.usernameTextbox = special_QLineEdit(self.generalEmailSettings)
         self.usernameTextbox.setGeometry(QtCore.QRect(70, 82, 113, 20))
         self.usernameTextbox.setObjectName(_fromUtf8("usernameTextbox"))
-        self.passwordTextbox = QtGui.QLineEdit(self.generalEmailSettings)
+        self.passwordTextbox = special_QLineEdit(self.generalEmailSettings)
         self.passwordTextbox.setGeometry(QtCore.QRect(70, 117, 113, 20))
         self.passwordTextbox.setEchoMode(QtGui.QLineEdit.Password)
         self.passwordTextbox.setObjectName(_fromUtf8("passwordTextbox"))
@@ -728,21 +733,21 @@ class Ui_sccw_SettingsUI(object):
         self.emailFromLabel = QtGui.QLabel(self.emailMessageGroup)
         self.emailFromLabel.setGeometry(QtCore.QRect(15, 30, 41, 16))
         self.emailFromLabel.setObjectName(_fromUtf8("emailFromLabel"))
-        self.emailFromTextbox = QtGui.QLineEdit(self.emailMessageGroup)
+        self.emailFromTextbox = special_QLineEdit(self.emailMessageGroup)
         self.emailFromTextbox.setGeometry(QtCore.QRect(55, 27, 146, 20))
         self.emailFromTextbox.setInputMethodHints(QtCore.Qt.ImhEmailCharactersOnly)
         self.emailFromTextbox.setObjectName(_fromUtf8("emailFromTextbox"))
         self.emailToLabel = QtGui.QLabel(self.emailMessageGroup)
         self.emailToLabel.setGeometry(QtCore.QRect(215, 30, 21, 16))
         self.emailToLabel.setObjectName(_fromUtf8("emailToLabel"))
-        self.emailToTextbox = QtGui.QLineEdit(self.emailMessageGroup)
+        self.emailToTextbox = special_QLineEdit(self.emailMessageGroup)
         self.emailToTextbox.setGeometry(QtCore.QRect(235, 27, 146, 20))
         self.emailToTextbox.setInputMethodHints(QtCore.Qt.ImhEmailCharactersOnly)
         self.emailToTextbox.setObjectName(_fromUtf8("emailToTextbox"))
         self.emailSubjectLabel = QtGui.QLabel(self.emailMessageGroup)
         self.emailSubjectLabel.setGeometry(QtCore.QRect(10, 65, 46, 16))
         self.emailSubjectLabel.setObjectName(_fromUtf8("emailSubjectLabel"))
-        self.emailSubjectTextbox = QtGui.QLineEdit(self.emailMessageGroup)
+        self.emailSubjectTextbox = special_QLineEdit(self.emailMessageGroup)
         self.emailSubjectTextbox.setGeometry(QtCore.QRect(55, 62, 326, 20))
         self.emailSubjectTextbox.setInputMethodHints(QtCore.Qt.ImhNone)
         self.emailSubjectTextbox.setFrame(True)
@@ -815,6 +820,7 @@ class Ui_sccw_SettingsUI(object):
        
        
         ## Menu Bar ##
+        #File menu
         self.menubar = QtGui.QMenuBar(sccw_SettingsUI)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 805, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
@@ -860,6 +866,43 @@ class Ui_sccw_SettingsUI(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.action_Quit)
         self.menubar.addAction(self.menuFile.menuAction())
+        #Edit Menu
+        self.menu_Edit = QtGui.QMenu(self.menubar)
+        self.menu_Edit.setObjectName(_fromUtf8("menu_Edit"))
+        self.actionCut = QtGui.QAction(sccw_SettingsUI)
+        self.actionCut.setObjectName(_fromUtf8("actionCut"))
+        self.actionCut.setEnabled(False)
+        self.actionCopy = QtGui.QAction(sccw_SettingsUI)
+        self.actionCopy.setObjectName(_fromUtf8("actionCopy"))
+        self.actionCopy.setEnabled(False)
+        self.actionPaste = QtGui.QAction(sccw_SettingsUI)
+        self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
+        self.actionPaste.setEnabled(False)
+        self.actionDelete = QtGui.QAction(sccw_SettingsUI)
+        self.actionDelete.setObjectName(_fromUtf8("actionDelete"))
+        self.actionDelete.setEnabled(False)
+        self.actionSelectAll = QtGui.QAction(sccw_SettingsUI)
+        self.actionSelectAll.setObjectName(_fromUtf8("actionSelectAll"))
+        self.actionSelectAll.setEnabled(False)
+        self.actionUndo = QtGui.QAction(sccw_SettingsUI)
+        self.actionUndo.setObjectName(_fromUtf8("actionUndo"))
+        self.actionUndo.setEnabled(False)
+        self.actionRedo = QtGui.QAction(sccw_SettingsUI)
+        self.actionRedo.setObjectName(_fromUtf8("actionRedo"))
+        self.actionRedo.setEnabled(False)
+        self.menu_Edit.addAction(self.actionUndo)
+        self.menu_Edit.addAction(self.actionRedo)
+        self.menu_Edit.addSeparator()
+        self.menu_Edit.addAction(self.actionCut)
+        self.menu_Edit.addAction(self.actionCopy)
+        self.menu_Edit.addAction(self.actionPaste)
+        self.menu_Edit.addAction(self.actionDelete)
+        self.menu_Edit.addSeparator()
+        self.menu_Edit.addAction(self.actionSelectAll)
+        
+        #Add File and Edit menus to main menu bar
+        self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menu_Edit.menuAction())
         
         #Disable sections by default
         self.ggVerboseTabTextbox.setEnabled(False)
@@ -905,6 +948,9 @@ class Ui_sccw_SettingsUI(object):
         self.tabWidget.setCurrentIndex(0)
         
         ## Slot connectors ##
+        #Undo/Redo system
+        self.undoRedoSystem.setupSlots()
+        
         #File drag-and-drop support
         QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("gotFileDrop"), self.guiActions.fileDropAction)
         #Script status update signal
@@ -977,8 +1023,17 @@ class Ui_sccw_SettingsUI(object):
         QtCore.QObject.connect(self.extCmdMasterEnableCheck, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.guiActions.EDsection_externalcmd)
         QtCore.QObject.connect(self.emailMasterEnableCheck, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.guiActions.EDsection_emailer)
         
-        #DELETEME TEST
-        #QtCore.QObject.connect(self.ggVerboseTabTextbox, QtCore.SIGNAL(_fromUtf8("editingFinished()")), self.guiActions.deleteme)
+        #Edit Menu
+        QtCore.QObject.connect(self.menu_Edit, QtCore.SIGNAL(_fromUtf8("aboutToShow()")), self.guiActions.updateEditMenuStatus)
+        QtCore.QObject.connect(self.actionUndo, QtCore.SIGNAL(_fromUtf8("triggered()")), self.undoRedoSystem.undo)
+        QtCore.QObject.connect(self.actionRedo, QtCore.SIGNAL(_fromUtf8("triggered()")), self.undoRedoSystem.redo)
+        QtCore.QObject.connect(self.actionCut, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.customContextMenu_Cut)
+        QtCore.QObject.connect(self.actionCopy, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.customContextMenu_Copy)
+        QtCore.QObject.connect(self.actionPaste, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.customContextMenu_Paste)
+        QtCore.QObject.connect(self.actionDelete, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.customContextMenu_Delete)
+        QtCore.QObject.connect(self.actionSelectAll, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.customContextMenu_SelectAll)
+        
+
         
         #This was supposed to make things easier, but im questioning things now
         #These control the size-limit and regex validators.
@@ -1284,7 +1339,8 @@ class Ui_sccw_SettingsUI(object):
         self.ugServVerActual.setText(_translate("sccw_SettingsUI", "<html><head/><body><p><span style=\" font-weight:600; color:#ff5500;\">???</span></p></body></html>", None))
         self.ugCheckUpdateButton.setText(_translate("sccw_SettingsUI", "Check for Updates", None))
         
-        #Menu Bar
+        #Menu Bar text and shortcuts
+        #File Menu
         self.menuFile.setTitle(_translate("sccw_SettingsUI", "&File", None))
         self.action_New.setText(_translate("sccw_SettingsUI", "&New", None))
         self.action_New.setShortcut(QtCore.Qt.Key_N | QtCore.Qt.CTRL)
@@ -1296,6 +1352,22 @@ class Ui_sccw_SettingsUI(object):
         self.actionSave_As.setShortcut(QtCore.Qt.Key_S | QtCore.Qt.CTRL | QtCore.Qt.ALT)
         self.action_Quit.setText(_translate("sccw_SettingsUI", "&Quit", None))
         self.action_Quit.setShortcut(QtCore.Qt.Key_Q | QtCore.Qt.CTRL)
+        #Edit Menu
+        self.menu_Edit.setTitle(_translate("sccw_SettingsUI", "&Edit", None))
+        self.actionUndo.setText(_translate("sccw_SettingsUI", "&Undo", None))
+        self.actionUndo.setShortcut(QtCore.Qt.Key_Z | QtCore.Qt.CTRL)
+        self.actionRedo.setText(_translate("sccw_SettingsUI", "&Redo", None))
+        self.actionRedo.setShortcut(QtCore.Qt.Key_Y | QtCore.Qt.CTRL)
+        self.actionCut.setText(_translate("sccw_SettingsUI", "Cu&t", None))
+        self.actionCut.setShortcut(QtCore.Qt.Key_X | QtCore.Qt.CTRL)
+        self.actionCopy.setText(_translate("sccw_SettingsUI", "&Copy", None))
+        self.actionCopy.setShortcut(QtCore.Qt.Key_C | QtCore.Qt.CTRL)
+        self.actionPaste.setText(_translate("sccw_SettingsUI", "&Paste", None))
+        self.actionPaste.setShortcut(QtCore.Qt.Key_V | QtCore.Qt.CTRL)
+        self.actionDelete.setText(_translate("sccw_SettingsUI", "&Delete", None))
+        self.actionDelete.setShortcut(QtCore.Qt.Key_Delete)
+        self.actionSelectAll.setText(_translate("sccw_SettingsUI", "&Select All", None))
+        self.actionSelectAll.setShortcut(QtCore.Qt.Key_A | QtCore.Qt.CTRL)
         
         ##Tooltips, LOTS of em
         self.ggMasterAutodlCheck.setToolTip(_translate("sccw_SettingsUI", "Enable/Disable automatically starting the autodl script at startup If disabled, \n""you will have to manually detect network settings using the SCCwatcher menu \n""in the Xchat/Hexchat GUI or use the text command: /sccwatcher detectnetwork ", None))
