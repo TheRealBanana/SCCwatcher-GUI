@@ -322,7 +322,11 @@ class guiActions(object):
         ul_set["wlist"]["lower"] = [self.context.WLSGsizeLimitLowerTextbox, self.context.WLSGsizeLimitLowerSuffixSelector]
         ul_set["wlist"]["upper"] = [self.context.WLSGsizeLimitUpperTextbox, self.context.WLSGsizeLimitUpperSuffixSelector]
         
-        #Sanity checks, we dont want to do anything unless both boxes have integers in them
+        #Reset to plain white first off, we only want to change color when we know for sure the numbers dont match.
+        ul_set[tab]["lower"][0].setStyleSheet("QLineEdit { background: rgb(255, 255, 255); }")
+        ul_set[tab]["upper"][0].setStyleSheet("QLineEdit { background: rgb(255, 255, 255); }")
+        
+        #Sanity checks, we dont want to do anything unless both boxes have integers in them       
         try:
             int(ul_set[tab]["lower"][0].text())
             int(ul_set[tab]["upper"][0].text())
@@ -340,10 +344,7 @@ class guiActions(object):
             #We got a prob, change the background so we know
             ul_set[tab]["lower"][0].setStyleSheet("QLineEdit { background: rgb(255, 100, 0); }")
             ul_set[tab]["upper"][0].setStyleSheet("QLineEdit { background: rgb(255, 100, 0); }")
-        else:
-            #no prob, make sure the background is fine
-            ul_set[tab]["lower"][0].setStyleSheet("QLineEdit { background: rgb(255, 255, 255); }")
-            ul_set[tab]["upper"][0].setStyleSheet("QLineEdit { background: rgb(255, 255, 255); }")
+        
     
     
     def updateUiTitle(self, text):
@@ -514,11 +515,18 @@ class guiActions(object):
     def removeListItem(self, access_object):
         #Get the currently selected item
         current_selection = access_object.currentItem()
+        #Save it to undo/redo stack
+        self.context.undoRedoSystem.new_undoredo_QListWidget(access_object, current_selection, op="rem")
         #Get the index of the current item
         current_selection_index = access_object.row(current_selection)
         #And now we remove our watch item from the QListWidget. This also removes any temporary data associated with this item at the same time.
         removed_item = access_object.takeItem(current_selection_index)
         del(removed_item) #Sometimes I don't trust the GC, and it can't hurt to be sure.
+        #Set focus to whatever item is below us if possible
+        if access_object.count() == current_selection_index:
+            access_object.setCurrentRow(current_selection_index-1)
+        else:
+            access_object.setCurrentRow(current_selection_index)
 
         
     def addWatchListItem(self):
@@ -567,8 +575,12 @@ class guiActions(object):
         item.setData(Qt.UserRole, list_defaults)
         #And add the item to the list
         access_object.addItem(item)
-        #Finally we reenable sorting, if it was enabled before
+        #We reenable sorting, if it was enabled before
         access_object.setSortingEnabled(__sortingEnabled)
+        #Set focus to new object
+        access_object.setCurrentItem(item)
+        #Save the new item to undo/redo stack
+        self.context.undoRedoSystem.new_undoredo_QListWidget(access_object, item, op="add")
     
     def checkForDuplicates(self, access_object, item_text, alt_match=None): #I hate adding params as needed
         #This function will look for duplicate entries in the QWidgetList supplied as access_object
@@ -604,12 +616,13 @@ class guiActions(object):
     #Update functions for when anything is changed for a watchlist or avoidlist item.
     #These two functions save all the data for the item, not just the piece of data that has changed.
     def saveAllAvoidlistItems(self):
-        self.saveAllListItems(self.context.avoidlistItemsList, self.context.avoidNameTextbox, self.context.avoidListElements)
+        self.saveAllListItems(self.context.avoidlistItemsList, self.context.avoidNameTextbox, self.context.avoidListElements, self.context.SettingsManager.guiDefaults["avoidlistDefaults"])
     
     def saveAllWatchlistItems(self):
-        self.saveAllListItems(self.context.WLGwatchlistItemsList, self.context.WLSGwatchNameTextbox, self.context.watchListElements)
+        self.saveAllListItems(self.context.WLGwatchlistItemsList, self.context.WLSGwatchNameTextbox, self.context.watchListElements, self.context.SettingsManager.guiDefaults["watchlistDefaults"])
         
-    def saveAllListItems(self, access_object, item_title_object, elements_list):
+    
+    def saveAllListItems(self, access_object, item_title_object, elements_list, defaults):
         #Don't operate during a load operation
         if self.__is_loading is True:
             return
@@ -629,7 +642,7 @@ class guiActions(object):
         item_title_object.setText(cur_title)
         
         #Now call the saveListData() function with the avoidlist elements and objects passed
-        self.saveListData(elements_list, current_list_item)
+        self.saveListData(elements_list, current_list_item, defaults)
 
     #These Three functions save the data associated with each watch or avoid item whenever the user switches watch items.
     #The third is the master function while the other two just provide unique data tot he master.
@@ -647,7 +660,7 @@ class guiActions(object):
         #If things go south here, its probably because its an Untitled entry or theres no entry at all.
         #We still want to reset though so we allow it to pass even if it fails
         if previous_listwidget_item is not None:
-            self.saveListData(listwidget_elements, previous_listwidget_item)
+            self.saveListData(listwidget_elements, previous_listwidget_item, reset_data)
 
         #reset listwidget
         self.clearUiData(reset_data)
@@ -656,7 +669,7 @@ class guiActions(object):
         if new_listwidget_item is not None:
             new_data = new_listwidget_item.data(Qt.UserRole).toPyObject()
             if new_data is not None:
-                self.loadListData(new_data)       
+                self.loadListData(new_data)
             #Set the current selection to this item to be sure
             new_listwidget_item.listWidget().setCurrentItem(new_listwidget_item)
             #Now that we have loaded up our data, we enable the watch/avoid list's option groups if necessary
@@ -667,13 +680,18 @@ class guiActions(object):
             #Ok so we know new_listwidget_item is NoneType, this means the user has no item selected.
             #We will disable the group of options adjacent to the listwidget object
             opgrp_access_object.setDisabled(True)
+        
+        #Update sizecheck if on tab 2
+        if self.context.tabWidget.currentIndex() == 2:
+            self.checkSizeLimitBounds("wlist")
+        
         #And set the load var again to its normal state
         self.__is_loading = False
         
         
     #These three functions deal with saving, clearing, and loading from watchlists.
-    def saveListData(self, listwidget_elements, listwidget_item):
-        item_save_data = DC(self.context.SettingsManager.guiDefaults["watchlistDefaults"])
+    def saveListData(self, listwidget_elements, listwidget_item, defaults):
+        item_save_data = DC(defaults)
         
         #Loop through each item in listwidget_elements
         for element in listwidget_elements:
@@ -726,11 +744,13 @@ class guiActions(object):
 
     def updateCurrentWatchTitle(self, text):
         current_item = self.context.WLGwatchlistItemsList.currentItem()
-        current_item.setText(text)
+        if current_item is not None:
+            current_item.setText(text)
     
     def updateCurrentAvoidTitle(self, text):
         current_item = self.context.avoidlistItemsList.currentItem()
-        current_item.setText(text)
+        if current_item is not None:
+            current_item.setText(text)
     
     def clearList(self, access_object):
         #This function will remove all items from the QListWidget supplied as access_object
@@ -1328,6 +1348,8 @@ class guiActions(object):
             #We are going to return the filename instead
             return chosenFile
         else:
+            #Tell the undo/redo system to ignore this update
+            access_object.ignoreBrowseButtonSet = True
             access_object.setText(_translate("sccw_SettingsUI", chosenFile, None))
     
     
@@ -1465,47 +1487,80 @@ class guiActions(object):
         
         #Update selection options if necessary
         if currentWidget is not None:
-            if "special_QLineEdit" in str(currentWidget):
+            #Set all to disabled by default
+            self.context.actionCut.setEnabled(False)
+            self.context.actionCopy.setEnabled(False)
+            self.context.actionPaste.setEnabled(False)
+            self.context.actionDelete.setEnabled(False)
+            self.context.actionSelectAll.setEnabled(False)
+            
+            if re.search("special_Q(Line|Text)Edit", str(currentWidget)) is not None:
+                print "HERE"
                 self.context.actionSelectAll.setEnabled(True)
-                #Check for selection
-                self.context.actionCut.setEnabled(currentWidget.hasSelectedText())
-                self.context.actionCopy.setEnabled(currentWidget.hasSelectedText())
-                self.context.actionDelete.setEnabled(currentWidget.hasSelectedText())
                 #Check for clipboard
                 if len(QtGui.QApplication.clipboard().text()) > 0:
                     self.context.actionPaste.setEnabled(True)
                 else:
                     self.context.actionPaste.setEnabled(False)
+            
+            if "special_QSpinBox" in str(currentWidget):
+                self.context.actionSelectAll.setEnabled(True)
+            
+            if "special_QLineEdit" in str(currentWidget):
+                #Check for selection
+                self.context.actionCut.setEnabled(currentWidget.hasSelectedText())
+                self.context.actionCopy.setEnabled(currentWidget.hasSelectedText())
+                self.context.actionDelete.setEnabled(currentWidget.hasSelectedText())
                 
-    def customContextMenu_Cut(self):
-        currentWidget = self.context.MainWindow.window().focusWidget()
+            elif "special_QTextEdit" in str(currentWidget):
+                cursor = QtGui.QTextCursor(currentWidget.textCursor())
+                self.context.actionCut.setEnabled(cursor.hasSelection())
+                self.context.actionCopy.setEnabled(cursor.hasSelection())
+                self.context.actionDelete.setEnabled(cursor.hasSelection())
+                
+    def customContextMenu_hasSelection(self, currentWidget):
         if "special_QLineEdit" in str(currentWidget):
             if currentWidget.hasSelectedText() is True:
-                currentWidget.cut()
+                return 1
+        elif "special_QTextEdit" in str(currentWidget):
+            cursor = QtGui.QTextCursor(currentWidget.textCursor())
+            if cursor.hasSelection() is True:
+                return 2
+        return None
+    
+    def customContextMenu_Cut(self):
+        currentWidget = self.context.MainWindow.window().focusWidget()
+        has_selection = self.customContextMenu_hasSelection(currentWidget)
+        if has_selection == 1 or has_selection == 2:
+            currentWidget.cut()
     
     def customContextMenu_Copy(self):
         currentWidget = self.context.MainWindow.window().focusWidget()
-        if "special_QLineEdit" in str(currentWidget):
-            if currentWidget.hasSelectedText() is True:
-                currentWidget.copy()
-            pass
+        has_selection = self.customContextMenu_hasSelection(currentWidget)
+        if has_selection == 1 or has_selection == 2:
+            currentWidget.copy()
     
     def customContextMenu_Paste(self):
         currentWidget = self.context.MainWindow.window().focusWidget()
-        if "special_QLineEdit" in str(currentWidget):
+        if any(x in str(currentWidget) for x in ["special_QLineEdit", "special_QTextEdit", "special_QSpinBox"]):
             if len(QtGui.QApplication.clipboard().text()) > 0:
                 currentWidget.paste()
     
-    def customContextMenu_Delete(self):
-        currentWidget = self.context.MainWindow.window().focusWidget()
-        if "special_QLineEdit" in str(currentWidget):
-            if currentWidget.hasSelectedText() is True:
-                currentWidget.del_()
-    
     def customContextMenu_SelectAll(self):
         currentWidget = self.context.MainWindow.window().focusWidget()
-        if "special_QLineEdit" in str(currentWidget):
+        if any(x in str(currentWidget) for x in ["special_QLineEdit", "special_QTextEdit", "special_QSpinBox"]):
             currentWidget.selectAll()
+            
+    def customContextMenu_Delete(self):
+        currentWidget = self.context.MainWindow.window().focusWidget()
+        #Not sure which way I like better, this one or the one in customContextMenu_Paste. This one is longer but easier to read.
+        has_selection = self.customContextMenu_hasSelection(currentWidget)
+        if has_selection == 1:
+            if currentWidget.hasSelectedText() is True:
+                currentWidget.del_()
+        elif has_selection == 2:
+            cursor = QtGui.QTextCursor(currentWidget.textCursor())
+            cursor.removeSelectedText()
     
     def quitApp(self):
         #Basically the same as new, except we then quit after that
