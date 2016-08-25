@@ -3,7 +3,7 @@ from collections import OrderedDict as OD
 from copy import deepcopy as DC
 
 #Tracking the current version from here only, making the change here updates everything.
-_CURRENT_GUI_VERSION_ = "2.1b1"
+_CURRENT_GUI_VERSION_ = "2.1b2"
 #GitHub API url for version infos
 _GITHUB_VERSION_URL_ = "https://api.github.com/repos/TheRealBanana/SCCwatcher-GUI/releases/latest"
 
@@ -146,8 +146,8 @@ guiDefaults["allOtherDefaults"]["globalSizeLimitLowerTextbox"] = ""
 guiDefaults["allOtherDefaults"]["globalSizeLimitUpperTextbox"] = ""
 guiDefaults["allOtherDefaults"]["globalSizeLimitLowerSuffixSelector"] = 0
 guiDefaults["allOtherDefaults"]["globalSizeLimitUpperSuffixSelector"] = 0
-guiDefaults["allOtherDefaults"]["globalMaxTriesSpinbox"] = 0
-guiDefaults["allOtherDefaults"]["globalRetryWaitSpinbox"] = 0
+guiDefaults["allOtherDefaults"]["globalMaxTriesSpinbox"] = 15
+guiDefaults["allOtherDefaults"]["globalRetryWaitSpinbox"] = 1
 guiDefaults["allOtherDefaults"]["globalCFBypassUseragentTextbox"] = ""
 guiDefaults["allOtherDefaults"]["globalCFBypassCookiefilePathTextbox"] = ""
 guiDefaults["allOtherDefaults"]["ftpMasterEnableCheck"] = 0

@@ -64,7 +64,7 @@ class Client(threading.Thread):
     def quit_thread(self):
         self.quitting = True
         try:
-            self.main_socket.send("CONNECTION_CLOSING;;;")
+            self.main_socket.send("CONNECTION_CLOSING")
         except:
             pass
         try:
@@ -78,13 +78,10 @@ class Client(threading.Thread):
             if int(time()) - self.last_connect_try > self.CONNECT_WAIT:
                 self.last_connect_try = int(time())
                 try:
-                    try:
-                        portnum = self.gref.get_current_port()
-                        if portnum is None:
-                            raise Exception("Error obtaining port num, client thread not started")
-                        self.address = ("127.0.0.1", portnum)
-                    except:
+                    portnum = self.gref.get_current_port()
+                    if portnum is None:
                         continue
+                    self.address = ("127.0.0.1", portnum)
                     self.main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.main_socket.settimeout(self.DATA_WAIT_TIMEOUT)
                     self.main_socket.connect(self.address)
@@ -101,7 +98,7 @@ class Client(threading.Thread):
     def get_script_status(self):
         if self.connected is True and self.quitting is False:
             try:
-                self.main_socket.send("GET_SCRIPT_STATUS;;;")
+                self.main_socket.send("GET_SCRIPT_STATUS")
                 self.waiting = True
             except Exception as e:
                 if "timed out" not in str(e):
@@ -113,7 +110,6 @@ class Client(threading.Thread):
         
     def pass_script_cmd(self, cmd):
         if self.connected is True and self.quitting is False and len(cmd) > 0:
-            cmd = cmd + ";;;"
             try:
                 self.main_socket.send(cmd)
                 #Wait for receive confirm
@@ -131,7 +127,6 @@ class Client(threading.Thread):
             try:
                 rawdata = self.main_socket.recv(8192)
                 try:
-                    rawdata = re.search(":::(.*?);;;", repr(rawdata), re.MULTILINE).group(1)
                     rawdata = rawdata.replace("\\n", "\n")
                     rawdata = rawdata.replace("\\\\", "\\")
                 except:
@@ -187,12 +182,13 @@ class Client(threading.Thread):
                     if data == "CONNECTION_CLOSING":
                         self.main_socket.close()
                         self.connected = False
+                        continue
                     if isinstance(data, basestring) is True:
                         continue
                     self.MW.emit(SIGNAL("gotScriptStatusUpdate"), data, True)
                 continue
             
-            sleep(1)
+            sleep(1) #Can we ever even get here?
         try:
             self.main_socket.close()
         except:
@@ -1495,7 +1491,6 @@ class guiActions(object):
             self.context.actionSelectAll.setEnabled(False)
             
             if re.search("special_Q(Line|Text)Edit", str(currentWidget)) is not None:
-                print "HERE"
                 self.context.actionSelectAll.setEnabled(True)
                 #Check for clipboard
                 if len(QtGui.QApplication.clipboard().text()) > 0:

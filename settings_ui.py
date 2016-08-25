@@ -100,7 +100,7 @@ class Ui_sccw_SettingsUI(object):
         self.ggNetworkDelaySpinbox = special_QSpinBox(self.generalGroup)
         self.ggNetworkDelaySpinbox.setGeometry(QtCore.QRect(195, 120, 51, 22))
         self.ggNetworkDelaySpinbox.setObjectName(_fromUtf8("ggNetworkDelaySpinbox"))
-        self.ggNetworkDelaySpinbox.setValue(20)
+        self.ggNetworkDelaySpinbox.setValue(self.SettingsManager.guiDefaults["allOtherDefaults"]["ggNetworkDelaySpinbox"])
         self.ggNetworkDelayLabel = QtGui.QLabel(self.generalGroup)
         self.ggNetworkDelayLabel.setGeometry(QtCore.QRect(15, 125, 171, 16))
         self.ggNetworkDelayLabel.setObjectName(_fromUtf8("ggNetworkDelayLabel"))
@@ -344,9 +344,11 @@ class Ui_sccw_SettingsUI(object):
         self.globalMaxTriesSpinbox = special_QSpinBox(self.generalDownloadSettingsGroup)
         self.globalMaxTriesSpinbox.setGeometry(QtCore.QRect(289, 59, 42, 22))
         self.globalMaxTriesSpinbox.setObjectName(_fromUtf8("globalMaxTriesSpinbox"))
+        self.globalMaxTriesSpinbox.setValue(self.SettingsManager.guiDefaults["allOtherDefaults"]["globalMaxTriesSpinbox"])
         self.globalRetryWaitSpinbox = special_QSpinBox(self.generalDownloadSettingsGroup)
         self.globalRetryWaitSpinbox.setGeometry(QtCore.QRect(289, 88, 42, 22))
         self.globalRetryWaitSpinbox.setObjectName(_fromUtf8("globalRetryWaitSpinbox"))
+        self.globalRetryWaitSpinbox.setValue(self.SettingsManager.guiDefaults["allOtherDefaults"]["globalRetryWaitSpinbox"])
         self.utWebUiUploadGroup = QtGui.QGroupBox(self.downloadUploadTab)
         self.utWebUiUploadGroup.setGeometry(QtCore.QRect(415, 275, 351, 171))
         self.utWebUiUploadGroup.setObjectName(_fromUtf8("utWebUiUploadGroup"))
@@ -1156,6 +1158,9 @@ class Ui_sccw_SettingsUI(object):
         
         #Start client thread for GUI <-> script coms
         self.guiActions.startClientThread()
+        
+        #set up a new document
+        self.guiActions.newSettingsFile()
         
     def retranslateUi(self, sccw_SettingsUI):
         sccw_SettingsUI.setWindowTitle(_translate("sccw_SettingsUI", "SCCwatcher - New Settings File", None))
