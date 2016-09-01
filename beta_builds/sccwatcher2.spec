@@ -16,6 +16,6 @@ exe = EXE(pyz,
           name='sccwatcher_gui.exe',
           debug=False,
           strip=None,
-          upx=True,
+          upx=False,
           console=False,
           icon='../icons/logo.ico')
