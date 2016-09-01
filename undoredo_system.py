@@ -3,7 +3,6 @@
 
 
 from PyQt4 import QtCore, QtGui
-from re import match as re_match
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -381,8 +380,7 @@ class undoRedoSystem(object):
                 elif "special_QSpinBox" in str(type(live_element)):
                         QtCore.QObject.connect(live_element, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.new_undoredo_QSpinBox)
                         QtCore.QObject.connect(live_element, QtCore.SIGNAL(_fromUtf8("customContextMenuRequested(QPoint)")), live_element.customContextMenu)
-        
-                        
+    
     def reset(self):
         self.undo_stack = []
         self.context.actionUndo.setEnabled(False)
