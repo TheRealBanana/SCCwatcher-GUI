@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>netOptionsDialog</class>
+ <widget class="QDialog" name="netOptionsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>352</width>
+    <height>179</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>352</width>
+    <height>179</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>352</width>
+    <height>179</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Network Options</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="icon_resources.qrc">
+    <normaloff>:/guiIcons/icons/logo.png</normaloff>:/guiIcons/icons/logo.png</iconset>
+  </property>
+  <property name="modal">
+   <bool>false</bool>
+  </property>
+  <widget class="QDialogButtonBox" name="acceptCancelButtons">
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>145</y>
+     <width>321</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+   <property name="centerButtons">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="localRadio">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>10</y>
+     <width>131</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+     <kerning>false</kerning>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Connect to a locally running SCCwatcher script.</string>
+   </property>
+   <property name="text">
+    <string>Local Script</string>
+   </property>
+   <property name="autoExclusive">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="remoteScriptGroupBox">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>45</y>
+     <width>321</width>
+     <height>96</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="QRadioButton" name="remoteRadio">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>5</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>MS Shell Dlg 2</family>
+      <pointsize>10</pointsize>
+      <stylestrategy>PreferDefault</stylestrategy>
+      <kerning>false</kerning>
+     </font>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="toolTip">
+     <string>Connect to an SCCwatcher script on a remote computer.</string>
+    </property>
+    <property name="statusTip">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>Remote Script</string>
+    </property>
+    <property name="autoExclusive">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="RSGB_ipHostnameLabel">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>18</x>
+      <y>30</y>
+      <width>101</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>IP or hostname of the remote computer where the SCCwatcher script is running.</string>
+    </property>
+    <property name="text">
+     <string>IP/Hostname: </string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <property name="buddy">
+     <cstring>RSGB_ipHostnameTextbox</cstring>
+    </property>
+   </widget>
+   <widget class="QLabel" name="RSGB_portLabel">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>60</y>
+      <width>46</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>Port number of the remote computer where the SCCwatcher script is running.</string>
+    </property>
+    <property name="text">
+     <string>Port:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <property name="buddy">
+     <cstring>RSGB_portTextbox</cstring>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="RSGB_ipHostnameTextbox">
+    <property name="geometry">
+     <rect>
+      <x>122</x>
+      <y>32</y>
+      <width>186</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>IP or hostname of the remote computer where the SCCwatcher script is running.</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="RSGB_portTextbox">
+    <property name="geometry">
+     <rect>
+      <x>122</x>
+      <y>62</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Port number of the remote computer where the SCCwatcher script is running.</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>localRadio</tabstop>
+  <tabstop>remoteRadio</tabstop>
+  <tabstop>RSGB_ipHostnameTextbox</tabstop>
+  <tabstop>RSGB_portTextbox</tabstop>
+  <tabstop>acceptCancelButtons</tabstop>
+ </tabstops>
+ <resources>
+  <include location="icon_resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>acceptCancelButtons</sender>
+   <signal>accepted()</signal>
+   <receiver>netOptionsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>243</x>
+     <y>194</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>acceptCancelButtons</sender>
+   <signal>rejected()</signal>
+   <receiver>netOptionsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>311</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>localRadio</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>netOptionsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>31</x>
+     <y>23</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>267</x>
+     <y>30</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remoteRadio</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>netOptionsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>26</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>21</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

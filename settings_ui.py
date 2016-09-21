@@ -269,6 +269,15 @@ class Ui_sccw_SettingsUI(object):
         self.sccsConStatusState.setTextFormat(QtCore.Qt.RichText)
         self.sccsConStatusState.setAlignment(QtCore.Qt.AlignCenter)
         self.sccsConStatusState.setObjectName(_fromUtf8("sccsConStatusState"))
+        self.scNetworkSettingsButton = QtGui.QPushButton(self.scriptControlGroup)
+        self.scNetworkSettingsButton.setGeometry(QtCore.QRect(379, 14, 24, 24))
+        self.scNetworkSettingsButton.setText(_fromUtf8(""))
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/guiIcons/icons/settings.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.scNetworkSettingsButton.setIcon(icon1)
+        self.scNetworkSettingsButton.setAutoDefault(False)
+        self.scNetworkSettingsButton.setFlat(False)
+        self.scNetworkSettingsButton.setObjectName(_fromUtf8("scNetworkSettingsButton"))
         self.tabWidget.addTab(self.mainTab, _fromUtf8(""))
         
         
@@ -990,6 +999,7 @@ class Ui_sccw_SettingsUI(object):
         QtCore.QObject.connect(self.scbfReloadScriptSettingsButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.reloadScriptIniFile)
         QtCore.QObject.connect(self.scbfToggleAutodlButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.toggleScriptAutodl)
         QtCore.QObject.connect(self.scbfEditCurIniButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.loadActiveIni)
+        QtCore.QObject.connect(self.scNetworkSettingsButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.guiActions.openNetworkSettingsDialog)
         #Data update triggers
         ##Watchlist##
         #textboxes
@@ -1067,6 +1077,7 @@ class Ui_sccw_SettingsUI(object):
         QtCore.QMetaObject.connectSlotsByName(sccw_SettingsUI)
         
         ## Tab Order ##
+        #General
         sccw_SettingsUI.setTabOrder(self.tabWidget, self.ggPasskeyTextbox)
         sccw_SettingsUI.setTabOrder(self.ggPasskeyTextbox, self.ggSavepathTextbox)
         sccw_SettingsUI.setTabOrder(self.ggSavepathTextbox, self.ggSavepathBrowseButton)
@@ -1079,13 +1090,19 @@ class Ui_sccw_SettingsUI(object):
         sccw_SettingsUI.setTabOrder(self.ggEnableVerboseCheck, self.ggVerboseTabTextbox)
         sccw_SettingsUI.setTabOrder(self.ggVerboseTabTextbox, self.ggBeepCheckbox)
         sccw_SettingsUI.setTabOrder(self.ggBeepCheckbox, self.ggEnableDebugCheck)
-        sccw_SettingsUI.setTabOrder(self.ggEnableDebugCheck, self.globalSSLDownloadCheck)
-        sccw_SettingsUI.setTabOrder(self.globalSSLDownloadCheck, self.globalDupecheckCheck)
-        sccw_SettingsUI.setTabOrder(self.globalDupecheckCheck, self.globalSizeLimitLowerTextbox)
+        sccw_SettingsUI.setTabOrder(self.ggEnableDebugCheck, self.scNetworkSettingsButton)
+        sccw_SettingsUI.setTabOrder(self.scNetworkSettingsButton, self.scbfReloadScriptSettingsButton)
+        sccw_SettingsUI.setTabOrder(self.scbfReloadScriptSettingsButton, self.scbfToggleAutodlButton)
+        sccw_SettingsUI.setTabOrder(self.scbfToggleAutodlButton, self.scbfEditCurIniButton)
+        sccw_SettingsUI.setTabOrder(self.scbfEditCurIniButton, self.globalDupecheckCheck)
+        sccw_SettingsUI.setTabOrder(self.globalDupecheckCheck, self.globalSSLDownloadCheck)
+        sccw_SettingsUI.setTabOrder(self.globalSSLDownloadCheck, self.globalSizeLimitLowerTextbox)
         sccw_SettingsUI.setTabOrder(self.globalSizeLimitLowerTextbox, self.globalSizeLimitLowerSuffixSelector)
         sccw_SettingsUI.setTabOrder(self.globalSizeLimitLowerSuffixSelector, self.globalSizeLimitUpperTextbox)
         sccw_SettingsUI.setTabOrder(self.globalSizeLimitUpperTextbox, self.globalSizeLimitUpperSuffixSelector)
-        sccw_SettingsUI.setTabOrder(self.globalSizeLimitUpperSuffixSelector, self.globalCFBypassCookiefilePathTextbox)
+        sccw_SettingsUI.setTabOrder(self.globalSizeLimitUpperSuffixSelector, self.globalMaxTriesSpinbox)
+        sccw_SettingsUI.setTabOrder(self.globalMaxTriesSpinbox, self.globalRetryWaitSpinbox)
+        sccw_SettingsUI.setTabOrder(self.globalRetryWaitSpinbox, self.globalCFBypassCookiefilePathTextbox)
         sccw_SettingsUI.setTabOrder(self.globalCFBypassCookiefilePathTextbox, self.globalCFBypassCookiefileBrowseButton)
         sccw_SettingsUI.setTabOrder(self.globalCFBypassCookiefileBrowseButton, self.globalCFBypassUseragentTextbox)
         sccw_SettingsUI.setTabOrder(self.globalCFBypassUseragentTextbox, self.extCmdMasterEnableCheck)
@@ -1106,6 +1123,7 @@ class Ui_sccw_SettingsUI(object):
         sccw_SettingsUI.setTabOrder(self.utwuiPortTextbox, self.utwuiUsernameTextbox)
         sccw_SettingsUI.setTabOrder(self.utwuiUsernameTextbox, self.utwuiPasswordTextbox)
         sccw_SettingsUI.setTabOrder(self.utwuiPasswordTextbox, self.WLGwatchlistItemsList)
+        #Watchlist
         sccw_SettingsUI.setTabOrder(self.WLGwatchlistItemsList, self.WLGaddEntryButton)
         sccw_SettingsUI.setTabOrder(self.WLGaddEntryButton, self.WLGremoveEntryButton)
         sccw_SettingsUI.setTabOrder(self.WLGremoveEntryButton, self.WLSGwatchNameTextbox)
@@ -1129,12 +1147,14 @@ class Ui_sccw_SettingsUI(object):
         sccw_SettingsUI.setTabOrder(self.WLSGutWebUiCheckox, self.WLSGftpUploadCheckbox)
         sccw_SettingsUI.setTabOrder(self.WLSGftpUploadCheckbox, self.WLSGemailCheckbox)
         sccw_SettingsUI.setTabOrder(self.WLSGemailCheckbox, self.avoidlistItemsList)
+        #Avoidlist
         sccw_SettingsUI.setTabOrder(self.avoidlistItemsList, self.addAvoidEntryButton)
         sccw_SettingsUI.setTabOrder(self.addAvoidEntryButton, self.removeAvoidEntryButton)
         sccw_SettingsUI.setTabOrder(self.removeAvoidEntryButton, self.avoidNameTextbox)
         sccw_SettingsUI.setTabOrder(self.avoidNameTextbox, self.avoidFilterTextbox)
         sccw_SettingsUI.setTabOrder(self.avoidFilterTextbox, self.avoidFilterRegexCheck)
         sccw_SettingsUI.setTabOrder(self.avoidFilterRegexCheck, self.emailMasterEnableCheck)
+        #Email Settings
         sccw_SettingsUI.setTabOrder(self.emailMasterEnableCheck, self.hostnameIPTextbox)
         sccw_SettingsUI.setTabOrder(self.hostnameIPTextbox, self.portTextbox)
         sccw_SettingsUI.setTabOrder(self.portTextbox, self.usernameTextbox)

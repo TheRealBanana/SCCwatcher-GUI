@@ -18,4 +18,4 @@ exe = EXE(pyz,
           strip=None,
           upx=False,
           console=False,
-          icon='../icons/logo.ico')
+          icon='../ui_files/icons/logo.ico')

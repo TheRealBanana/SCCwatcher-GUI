@@ -19,6 +19,7 @@ from ast import literal_eval as safe_eval
 from tempfile import gettempdir
 from os import sep as OS_SEP
 from time import sleep, time
+from net_options_dialog import Ui_netOptionsDialog
 
 
 try:
@@ -126,6 +127,9 @@ class Client(threading.Thread):
         if self.connected is True and self.quitting is False and self.recv_tries < 5:
             try:
                 rawdata = self.main_socket.recv(8192)
+                #Do we still need this try now that we've removed the re.search().groups() that would have raised exception if it failed?
+                #I mean its still possible I guess that if rawdata returns something other than a string it could fall through here again.
+                #Would I rather do an isinstance() in an if statement or keep the try?
                 try:
                     rawdata = rawdata.replace("\\n", "\n")
                     rawdata = rawdata.replace("\\\\", "\\")
@@ -204,6 +208,10 @@ class guiActions(object):
         #This just flags during the load operation itself and gives no indication as to whether or not something is currently loaded.
         self.__is_loading = False
         self.script_status_vars = self.context.SettingsManager.scriptStatusDefaults
+        self.network_state = 0
+        self.remote_network_address = "127.0.0.1"
+        self.remote_network_port = 0
+        
 
     
     def setLabelAndColor(self, element, status):
@@ -267,6 +275,21 @@ class guiActions(object):
             
         self.context.sccsConStatusState.setText(_translate("sccw_SettingsUI", control_status_html, None))
     
+    def setNetworkOptions(self, optiondict):
+        pass
+    
+    def openNetworkSettingsDialog(self):            
+        #Create and open our dialog window
+        netOptsDialog = QtGui.QDialog()
+        mQDialog = Ui_netOptionsDialog()
+        current_state = {}
+        current_state["state"] = self.network_state
+        current_state["address"] = self.remote_network_address
+        current_state["port"] = self.remote_network_port
+        mQDialog.setupUi(netOptsDialog, self, current_state)
+        netOptsDialog.show() #modal exec?
+
+
     def startClientThread(self):
         self.client_thread = Client(self)
         self.client_thread.start()  

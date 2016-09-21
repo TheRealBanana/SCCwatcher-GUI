@@ -360,7 +360,7 @@ class undoRedoSystem(object):
         for section, element_list in self.context.SettingsManager.guiDefaults.iteritems():
             for element in element_list:
                 #In the future, use self.context.findChild(QtCore.QObject, "myObjectName")
-                #If you dont have context for the mainWindow context use element.document().ui
+                #If you dont have context for the mainWindow context use element.window().ui
                 live_element = eval("self.context.%s" % element)
                 #Set up our connections
                 if "special_QLineEdit" in str(type(live_element)):

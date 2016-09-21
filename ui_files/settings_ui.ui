@@ -819,6 +819,29 @@ aids in diagnosing any issues with the script.</string>
         </property>
        </widget>
       </widget>
+      <widget class="QPushButton" name="scNetworkSettingsButton">
+       <property name="geometry">
+        <rect>
+         <x>379</x>
+         <y>14</y>
+         <width>24</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="icon_resources.qrc">
+         <normaloff>:/guiIcons/icons/settings.png</normaloff>:/guiIcons/icons/settings.png</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="downloadUploadTab">
@@ -3066,6 +3089,10 @@ p, li { white-space: pre-wrap; }
   <tabstop>ggVerboseTabTextbox</tabstop>
   <tabstop>ggBeepCheckbox</tabstop>
   <tabstop>ggEnableDebugCheck</tabstop>
+  <tabstop>scNetworkSettingsButton</tabstop>
+  <tabstop>scbfReloadScriptSettingsButton</tabstop>
+  <tabstop>scbfToggleAutodlButton</tabstop>
+  <tabstop>scbfEditCurIniButton</tabstop>
   <tabstop>globalDupecheckCheck</tabstop>
   <tabstop>globalSSLDownloadCheck</tabstop>
   <tabstop>globalSizeLimitLowerTextbox</tabstop>
