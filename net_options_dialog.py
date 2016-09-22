@@ -50,7 +50,7 @@ class Ui_netOptionsDialog(object):
         self.localRadio.setFont(font)
         self.localRadio.setAutoExclusive(True)
         self.localRadio.setObjectName(_fromUtf8("localRadio"))
-        self.localRadio.setChecked(int(state_data["state"]))
+        self.localRadio.setChecked(True)
         self.remoteScriptGroupBox = QtGui.QGroupBox(netOptionsDialog)
         self.remoteScriptGroupBox.setEnabled(True)
         self.remoteScriptGroupBox.setGeometry(QtCore.QRect(15, 45, 321, 96))
@@ -69,7 +69,7 @@ class Ui_netOptionsDialog(object):
         self.remoteRadio.setStatusTip(_fromUtf8(""))
         self.remoteRadio.setAutoExclusive(False)
         self.remoteRadio.setObjectName(_fromUtf8("remoteRadio"))
-        self.remoteRadio.setChecked(int(state_data["state"])^1)
+        self.remoteRadio.setChecked(False)
         self.RSGB_ipHostnameLabel = QtGui.QLabel(self.remoteScriptGroupBox)
         self.RSGB_ipHostnameLabel.setEnabled(True)
         self.RSGB_ipHostnameLabel.setGeometry(QtCore.QRect(18, 30, 101, 26))
@@ -104,8 +104,8 @@ class Ui_netOptionsDialog(object):
         ##Connections##
         QtCore.QObject.connect(self.acceptCancelButtons, QtCore.SIGNAL(_fromUtf8("accepted()")), self.accept)
         QtCore.QObject.connect(self.acceptCancelButtons, QtCore.SIGNAL(_fromUtf8("rejected()")), netOptionsDialog.reject)
-        QtCore.QObject.connect(self.localRadio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.radioToggle)
-        QtCore.QObject.connect(self.remoteRadio, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.radioToggle)
+        QtCore.QObject.connect(self.localRadio, QtCore.SIGNAL(_fromUtf8("released()")), self.radioToggle)
+        QtCore.QObject.connect(self.remoteRadio, QtCore.SIGNAL(_fromUtf8("released()")), self.radioToggle)
         QtCore.QMetaObject.connectSlotsByName(netOptionsDialog)
         ##Tab Order##
         netOptionsDialog.setTabOrder(self.localRadio, self.remoteRadio)
@@ -119,17 +119,24 @@ class Ui_netOptionsDialog(object):
         self.RSGB_portTextbox.setText(str(state_data["port"]))
         
     
-    def radioToggle(self, state):
-        try:
-            for line in traceback.format_stack(): print(line.strip())
-        except:
-            import traceback
-            for line in traceback.format_stack(): print(line.strip())
-        self.remoteRadio.setChecked(1^int(state))
-        self.RSGB_ipHostnameLabel.setDisabled(state)
-        self.RSGB_ipHostnameTextbox.setDisabled(state)
-        self.RSGB_portLabel.setDisabled(state)
-        self.RSGB_portTextbox.setDisabled(state)
+    def radioToggle(self, state=None):
+        element = self.context.context.MainWindow.sender()
+        
+        if state == None:
+            state = element.isChecked()
+        else:
+            self.localRadio.setChecked(state)
+        
+        if element == self.remoteRadio:
+            self.localRadio.setChecked(state^1)
+        else:
+            self.remoteRadio.setChecked(state^1)
+            state = 1^state
+        
+        self.RSGB_ipHostnameLabel.setEnabled(state)
+        self.RSGB_ipHostnameTextbox.setEnabled(state)
+        self.RSGB_portLabel.setEnabled(state)
+        self.RSGB_portTextbox.setEnabled(state)
     
     def accept(self):
         net_options = {}

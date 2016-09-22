@@ -43,7 +43,9 @@ def regexValidator(expr):
 
 
 class Client(threading.Thread):
-    def __init__(self, guiActionsReference):
+    def __init__(self, guiActionsReference, address, remote_connect):
+        self.address = address
+        self.remote_connect = remote_connect
         self.quitting = False
         self.recv_tries = 0
         self.connected = False
@@ -73,19 +75,30 @@ class Client(threading.Thread):
         except:
             pass
     
+    
+    def update_address(self, new_address, remote_connect):
+        #Don't update if we don't need to
+        if self.address == new_address:
+            return
+        self.address = new_address
+        self.remote_connect = remote_connect
+        self.connected = False
+        self.connection = None
+        
+    
     def get_connection(self):
         while self.connected is False and self.quitting is False:
             
             if int(time()) - self.last_connect_try > self.CONNECT_WAIT:
                 self.last_connect_try = int(time())
                 try:
-                    portnum = self.gref.get_current_port()
-                    if portnum is None:
+                    if self.remote_connect is False:
+                        self.address[1] = self.gref.get_current_port()
+                    if self.address[1] is None: #Failed to get port from file
                         continue
-                    self.address = ("127.0.0.1", portnum)
                     self.main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.main_socket.settimeout(self.DATA_WAIT_TIMEOUT)
-                    self.main_socket.connect(self.address)
+                    self.main_socket.connect(tuple(self.address))
                     self.connected = True
                     continue
                 except:
@@ -208,9 +221,9 @@ class guiActions(object):
         #This just flags during the load operation itself and gives no indication as to whether or not something is currently loaded.
         self.__is_loading = False
         self.script_status_vars = self.context.SettingsManager.scriptStatusDefaults
-        self.network_state = 0
-        self.remote_network_address = "127.0.0.1"
-        self.remote_network_port = 0
+        self.network_state = 1
+        self.remote_network_address = ""
+        self.remote_network_port = ""
         
 
     
@@ -276,7 +289,17 @@ class guiActions(object):
         self.context.sccsConStatusState.setText(_translate("sccw_SettingsUI", control_status_html, None))
     
     def setNetworkOptions(self, optiondict):
-        pass
+        #Check if we have a good port, otherwise dont update
+        try:
+            int(optiondict["port"])
+        except:
+            return
+        self.network_state = optiondict["state"]
+        self.remote_network_address = optiondict["address"]
+        self.remote_network_port = optiondict["port"]
+        
+        #Update the client thread with the new address
+        self.client_thread.update_address([self.remote_network_address, int(self.remote_network_port)], int(self.network_state)^1)
     
     def openNetworkSettingsDialog(self):            
         #Create and open our dialog window
@@ -287,11 +310,12 @@ class guiActions(object):
         current_state["address"] = self.remote_network_address
         current_state["port"] = self.remote_network_port
         mQDialog.setupUi(netOptsDialog, self, current_state)
-        netOptsDialog.show() #modal exec?
+        netOptsDialog.exec_() #modal exec?
 
 
     def startClientThread(self):
-        self.client_thread = Client(self)
+        
+        self.client_thread = Client(self, ["127.0.0.1", 0], False)
         self.client_thread.start()  
     
     def loadActiveIni(self):
