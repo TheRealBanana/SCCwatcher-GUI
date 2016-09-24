@@ -45,6 +45,8 @@ def regexValidator(expr):
 class Client(threading.Thread):
     def __init__(self, guiActionsReference, address, remote_connect):
         self.address = address
+        if remote_connect == False:
+            self.address = ["127.0.0.1", 0]
         self.remote_connect = remote_connect
         self.quitting = False
         self.recv_tries = 0
@@ -77,18 +79,26 @@ class Client(threading.Thread):
     
     
     def update_address(self, new_address, remote_connect):
-        #Don't update if we don't need to
-        if self.address == new_address:
-            return
-        self.address = new_address
+        if remote_connect == True:
+            self.address = new_address
+        else:
+            self.address = ["127.0.0.1", 0]
+            
         self.remote_connect = remote_connect
+        try:
+            self.main_socket.send("CONNECTION_CLOSING")
+        except:
+            pass
+        try:
+            self.main_socket.close()
+        except:
+            pass
         self.connected = False
         self.connection = None
         
     
     def get_connection(self):
         while self.connected is False and self.quitting is False:
-            
             if int(time()) - self.last_connect_try > self.CONNECT_WAIT:
                 self.last_connect_try = int(time())
                 try:
@@ -299,7 +309,13 @@ class guiActions(object):
         self.remote_network_port = optiondict["port"]
         
         #Update the client thread with the new address
-        self.client_thread.update_address([self.remote_network_address, int(self.remote_network_port)], int(self.network_state)^1)
+        self.client_thread.update_address([self.remote_network_address, int(self.remote_network_port)], bool(int(self.network_state)^1))
+        
+        #If we are a remote connect, then disable the edit scc2.ini button, otherwise make sure its enabled
+        if int(self.network_state) == 0:
+            self.context.scbfEditCurIniButton.setEnabled(False)
+        else:
+            self.context.scbfEditCurIniButton.setEnabled(True)
     
     def openNetworkSettingsDialog(self):            
         #Create and open our dialog window

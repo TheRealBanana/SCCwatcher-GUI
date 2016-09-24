@@ -965,6 +965,8 @@ class Ui_sccw_SettingsUI(object):
         QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("gotFileDrop"), self.guiActions.fileDropAction)
         #Script status update signal
         QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("gotScriptStatusUpdate"), self.guiActions.updateScriptStatusCallback)
+        #Network Options Dialog
+        QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL(_fromUtf8("updateNetworkOptions")), self.guiActions.setNetworkOptions)
         #Closing signal
         #So apparently we can use the signal QApplication::aboutToQuit(void)
         QtCore.QObject.connect(self.MainWindow, QtCore.SIGNAL("appClosing"), self.guiActions.quitApp)
@@ -1045,6 +1047,7 @@ class Ui_sccw_SettingsUI(object):
         QtCore.QObject.connect(self.actionPaste, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.customContextMenu_Paste)
         QtCore.QObject.connect(self.actionDelete, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.customContextMenu_Delete)
         QtCore.QObject.connect(self.actionSelectAll, QtCore.SIGNAL(_fromUtf8("triggered()")), self.guiActions.customContextMenu_SelectAll)
+        
         
 
         
